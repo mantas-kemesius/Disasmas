@@ -1,11 +1,6 @@
 # Disasmas
 Kompiuteriu architektura - disasembleris
 
-TASM: http://klevas.mif.vu.lt/~julius/Tools/asm/TASM.zip
-DOS emuliatorius DOSBox: http://www.dosbox.com/
-EMU8086: http://www.emu8086.com/
-
-
 <h1>Asemblerio komandų operacijos kodų sąrašas</h1>
 
 0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis</br>
@@ -161,3 +156,9 @@ numeris – vieno baito dydžio betarpiškas operandas</br>
 portas – vieno baito dydžio porto numeris</br>
 dx portas – dx reikšmė naudojama kaip porto numeris</br>
 xxx, yyy – naudojama formuojant preprocesoriaus komandos numerį;</br>
+
+
+<h2>Reikalinga paleidimui</h2>
+TASM: http://klevas.mif.vu.lt/~julius/Tools/asm/TASM.zip<br>
+DOS emuliatorius DOSBox: http://www.dosbox.com/<br>
+EMU8086: http://www.emu8086.com/<br>
