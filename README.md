@@ -6,7 +6,7 @@ DOS emuliatorius DOSBox: http://www.dosbox.com/
 EMU8086: http://www.emu8086.com/
 
 
-<h1>Asemblerio komandų operacijos kodų sąrašas/h1>
+<h1>Asemblerio komandų operacijos kodų sąrašas</h1>
 
 0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis
 0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas
