@@ -1,33 +1,3 @@
-
-.model small
-skBufDydis	EQU 20
-sk2BufDydis	EQU 20
-raBufDydis	EQU 20
-.stack 100h
-
-.data
-	duom	db "duom.txt",0
-	kiek dw 0
-	temp dw 0
-	p dw 0
-	a dw 0
-	sek dw 0
-	counter dw 0
-	bituKiekis dw 0
-
-	min dw 0
-	max dw 0
-
-	duom2	db "duom2.txt",0
-	rez	db "rez.txt",0
-	skBuf	db skBufDydis dup (?)
-	skBuf2	db sk2BufDydis dup (?)
-	raBuf	db raBufDydis dup (?)
-	dFail	dw ?
-	d2Fail	dw ?
-	rFail	dw ?
-
-.code
 .model small
 .stack 100h
 .data
@@ -50,10 +20,8 @@ raBufDydis	EQU 20
 	reg_reiksme db ?
 	rm_reiksme  db ?
 	pavadinimai db 'JMP   ROL   XOR   SAR   MOVSB MOVSW CMPSB CMPSW STOSB STOSW LODSB LODSW SCASB SCASW REPNE REP   '
-	  ;jmp-0 rol-6 xor-12 sar-18 movsb-24 movsw-30 cmpsb-36 cmpsw-42 stosb-48 stosw-54 lodsb-60 lodsw-66 scasb-72 scasw-78 repne-84 rep-90
 	regpavadinimai db 'alaxclcxdldxblbxahspchbpdhsibhdi'
-	  ;al-2ax-4cl-6cx-8dl-10dx-12bl-14bx-16ah-18sp-20ch-22bp-24dh-26si-28bh-30di-32
-	zinute1 db 'pvz teo.exe com.com ats.txt', 10, 13, '$'
+	zinute1 db 'Iveskite failus: pvz. com.com ats.txt', 10, 13, '$'
 	zinute2 db 'failo nepavyko atidaryti', 10, 13
 	zinute3 db 'failo nepavyko sukurti', 10, 13
 .code
@@ -71,8 +39,9 @@ start:
 ;------------------------pradedu skaityti parametrus	
 toliau:
 	mov si, 0081h
-	xor bx, bx
-;-----------------------skaitau pirma parametra
+	xor bx, bx     
+	
+;************************************ PIRMO PARAMETRO NUSKAITYMAS IR JO ATIDARYMAS *****************************************
 loop1:
 	mov al, es:[si + bx]
 	mov ds:[buff + bx], al
@@ -93,8 +62,10 @@ loop1:
 	
 praleidimas:
 	inc bx
-	loop loop1
-;---------------------skaitau ir kuriu antra parametra	
+	loop loop1     
+	
+;****************************** ANTRO PARAMETRO SKAITYMAS IR VELIAU SEKANTIS JO KURIMAS ************************************
+
 loop2:
 	mov al, es:[si + bx]
 	mov ds:[buffout + bx], al
@@ -110,6 +81,83 @@ loop loop2
 	mov filehandleout, ax
 ;----------------------baigiu skaityti parametrus
 
+;****************************************************************************************************************************
+;************************************ VISI FAILAI NUSKAITYT GALIME PRADETI ATLIKINETI DARBA *********************************
+
+	mov ah, 3Fh
+	mov bx, filehandle
+	mov cx, 5500
+	mov dx, offset bufsi
+	int 21h
+
+;********************************************** BAIGIAMAS SKAITYMAS PIRMU SIMBOLIU *****************************************
+	
+	mov cx, ax
+	xor si,si
+	xor bx,bx
+	xor ax,ax
+	xor bx,bx
+	xor dx,dx  
+	
+;********************************************* BAIGIAMAS REGISTRU ISVALYMAS *************************************************
+                                                         
+                                                         
+                                                         
+                                                         
+                                                         
+;****************************************************************************************************************************
+;============================== PRASIDEDA MAIN LOOP'AS, KURIAME BUS ATLIEKAMAS VISAS DARBAS ================================= 
+;****************************************************************************************************************************  
+                                              
+                                              
+    MainLoop:
+    mov senas_si, si
+	call spausdinti_ip
+	call sekos_spausdinimas
+
+
+
+
+
+
+
+
+
+
+
+
+
+;****************************************************************************************************************************
+;==================================== PROCEDUROS REIKALINGOS DIRBTI SU DUOMENIMIS ===========================================
+;****************************************************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;***************************************************************************************************************************
+;========================================== PROCEDUROS KURIOS REIKALINGOS NUSKAITYMUI ======================================
+;***************************************************************************************************************************    
 
 ;------------------------------------------ tikrina ar kaip parametras ivestas /?
 	arklaustukas proc near
@@ -162,8 +210,14 @@ loop loop2
 	failas_sukurtas:
 		ret
 	ar_sukure endp
-;------------------------------------
-	
+;------------------------------------   
+
+;***************************************************************************************************************************
+;======================================= PROCEDUROS KURIOS REIKALINGOS NUSKAITYMUI *END*  ===================================
+;***************************************************************************************************************************
+	               
+	               
+	               
 exit:
 	mov cx, bx
 	mov ax, 4000h
@@ -173,5 +227,6 @@ exit:
 
 	mov ax, 4C00h
 	int 21h
-	
+	          
+	          
 end start
