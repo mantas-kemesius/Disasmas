@@ -8,18 +8,18 @@ EMU8086: http://www.emu8086.com/
 
 <h1>Asemblerio komandų operacijos kodų sąrašas</h1>
 
-0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis
-0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas
-000sr 110 – PUSH segmento registras
-000sr 111 – POP segmento registras
-0000 10dw mod reg r/m [poslinkis] – OR registras V registras/atmintis
-0000 110w bojb [bovb] – OR akumuliatorius V betarpiškas operandas
-0001 00dw mod reg r/m [poslinkis] – ADC registras += registras/axtmintis
-0001 010w bojb [bovb] – ADC akumuliatorius += betarpiškas operandas
-0001 10dw mod reg r/m [poslinkis] – SBB registras -= registras/atmintis
-0001 110w bojb [bovb] – SBB akumuliatorius -= betarpiškas operandas
-0010 00dw mod reg r/m [poslinkis] – AND registras & registras/atmintis
-0010 010w bojb [bovb] – AND akumuliatorius & betarpiškas operandas
+0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis</br>
+0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas</br>
+000sr 110 – PUSH segmento registras</br>
+000sr 111 – POP segmento registras</br>
+0000 10dw mod reg r/m [poslinkis] – OR registras V registras/atmintis</br>
+0000 110w bojb [bovb] – OR akumuliatorius V betarpiškas operandas</br>
+0001 00dw mod reg r/m [poslinkis] – ADC registras += registras/axtmintis</br>
+0001 010w bojb [bovb] – ADC akumuliatorius += betarpiškas operandas</br>
+0001 10dw mod reg r/m [poslinkis] – SBB registras -= registras/atmintis</br>
+0001 110w bojb [bovb] – SBB akumuliatorius -= betarpiškas operandas</br>
+0010 00dw mod reg r/m [poslinkis] – AND registras & registras/atmintis</br>
+0010 010w bojb [bovb] – AND akumuliatorius & betarpiškas operandas</br>
 001sr 110 – segmento registro keitimo prefiksas
 0010 0111 – DAA
 0010 10dw mod reg r/m [poslinkis] – SUB registras -= registras/atmintis
