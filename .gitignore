@@ -1,2 +1,14 @@
 *.exe
 *.txt
+*.exe_
+*.exe_.debug
+*.exe_.list
+*.exe_.symbol
+*.exe_.~asm
+*.com_
+*.com_.debug
+*.com_.list
+*.com_.symbol
+*.com_.~asm
+*/
+*.com
