@@ -1,12 +1,14 @@
 <h1>Asemblerio komandų operacijos kodų sąrašas</h1>
 </br></br>
 <strong>Visi MOV variantai (6):</strong></br>
-1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis</br>
-1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis</br>
-1010 000w ajb avb – MOV akumuliatorius  atmintis</br>
-1010 001w ajb avb – MOV atmintis  akumuliatorius</br>
-1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas</br>
-1100 011w mod 000 r/m [poslinkis] bojb [bovb] – MOV registras/atmintis  betarpiškas operandas</br>
+1. 1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis</br>
+2. 1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis</br> 
+3. 1010 000w ajb avb – MOV akumuliatorius  atmintis</br>
+4. 1010 001w ajb avb – MOV atmintis  akumuliatorius</br>
+5. 1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas</br>
+6. 1100 011w mod 000 r/m [poslinkis] bojb [bovb] – MOV registras/atmintis  betarpiškas operandas</br>
+1. 88 - 8B  </br>2. 8C - 8E </br>3. A0 - A1 </br>4. C2 - C3 </br>5. B0 - BF </br>6. C6 - C7</br>
+
 </br></br>
 <strong>Visi PUSH variantai (3);</strong></br>
 000sr 110 – PUSH segmento registras</br>
