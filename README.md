@@ -7,20 +7,20 @@
 4. 1010 001w ajb avb – MOV atmintis  akumuliatorius</br>
 5. 1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas</br>
 6. 1100 011w mod 000 r/m [poslinkis] bojb [bovb] – MOV registras/atmintis  betarpiškas operandas</br>
-1. 88 - 8B  </br>2. 8C - 8E </br>3. A0 - A1 </br>4. C2 - C3 </br>5. B0 - BF </br>6. C6 - C7</br>
+1. 88 - 8B</br>2. 8C - 8E </br>3. A0 - A1 </br>4. C2 - C3 </br>5. B0 - BF </br>6. C6 - C7</br>
 
 </br></br>
 <strong>Visi PUSH variantai (3);</strong></br>
 1. 000sr 110 – PUSH segmento registras</br>
 2. 0101 0reg – PUSH registras (žodinis)</br>
 3. 1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis</br>
-1. 06 - 1E  </br>2. 50 - 57 </br>3. FF </br>
+1. 06 - 1E</br>2. 50 - 57 </br>3. FF </br>
 </br></br>
 <strong>Visi POP variantai (3);</strong></br>
 1. 0101 1reg – POP registras (žodinis)</br>
 2. 000sr 111 – POP segmento registras</br>
 3. 1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis</br>
-1. 58 - 5F  </br>2. 07 - 1F </br>3. 8F </br>
+1. 58 - 5F</br>2. 07 - 1F</br>3. 8F</br>
 
 </br></br>
 <strong>Visi ADD variantai (3);</strong></br>
@@ -31,6 +31,7 @@
 <strong>Visi INC variantai (2);</strong></br>
 0100 0reg – INC registras (žodinis)</br>
 1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis</br>
+1. 40 - 47</br>2. FE - FF</br>
 </br></br>
 <strong>Visi DEC variantai (2);</strong></br>
 0100 1reg – DEC registras (žodinis)</br>
