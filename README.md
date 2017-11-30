@@ -1,6 +1,6 @@
 <h1>Asemblerio komandų operacijos kodų sąrašas</h1>
 </br></br>
-Visi MOV variantai (6)</br>
+<strong>Visi MOV variantai (6):</strong></br>
 1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis</br>
 1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis</br>
 1010 000w ajb avb – MOV akumuliatorius  atmintis</br>
@@ -8,66 +8,66 @@ Visi MOV variantai (6)</br>
 1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas</br>
 1100 011w mod 000 r/m [poslinkis] bojb [bovb] – MOV registras/atmintis  betarpiškas operandas</br>
 </br></br>
-Visi PUSH variantai (3);</br>
+<strong>Visi PUSH variantai (3);</strong></br>
 000sr 110 – PUSH segmento registras</br>
 0101 0reg – PUSH registras (žodinis)</br>
 1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis</br>
 </br></br>
-Visi POP variantai (3);</br>
+<strong>Visi POP variantai (3);</strong></br>
 0101 1reg – POP registras (žodinis)</br>
 000sr 111 – POP segmento registras</br>
 1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis</br>
 </br></br>
-Visi ADD variantai (3);</br>
+<strong>Visi ADD variantai (3);</strong></br>
 0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas</br>
 0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis</br>
 1000 00sw mod 000 r/m [poslinkis] bojb [bovb] – ADD registras/atmintis += betarpiškas operandas</br>
 </br></br>
-Visi INC variantai (2);</br>
+<strong>Visi INC variantai (2);</strong></br>
 0100 0reg – INC registras (žodinis)</br>
 1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis</br>
 </br></br>
-Visi DEC variantai (2);</br>
+<strong>Visi DEC variantai (2);</strong></br>
 0100 1reg – DEC registras (žodinis)</br>
 1111 111w mod 001 r/m [poslinkis] – DEC registras/atmintis</br>
 </br></br>
-Visi SUB variantai (3);</br>
+<strong>Visi SUB variantai (3);</strong></br>
 0010 110w bojb [bovb] – SUB akumuliatorius -= betarpiškas operandas</br>
 1000 00sw mod 101 r/m [poslinkis] bojb [bovb] – SUB registras/atmintis -= betarpiškas operandas</br>
 0010 10dw mod reg r/m [poslinkis] – SUB registras -= registras/atmintis</br>
 </br></br>
-Visi CMP variantai (3);</br>
+<strong>Visi CMP variantai (3);</strong></br>
 0011 10dw mod reg r/m [poslinkis] – CMP registras ~ registras/atmintis</br>
 0011 110w bojb [bovb] – CMP akumuliatorius ~ betarpiškas operandas</br>
 1000 00sw mod 111 r/m [poslinkis] bojb [bovb] – CMP registras/atmintis ~ betarpiškas operandas</br>
 </br></br>
-Komanda MUL;</br>
+<strong>Komanda MUL;</strong></br>
 1111 011w mod 100 r/m [poslinkis] – MUL registras/atmintis</br>
 </br></br>
-Komanda DIV;</br>
+<strong>Komanda DIV;</strong></br>
 1111 011w mod 110 r/m [poslinkis] – DIV registras/atmintis</br>
 </br></br>
-Visi CALL variantai (4);</br>
+<strong>Visi CALL variantai (4);</strong></br>
 1001 1010 ajb avb srjb srvb – CALL žymė (išorinis tiesioginis)</br>
 1110 1000 pjb pvb – CALL žymė (vidinis tiesioginis)</br>
 1111 1111 mod 010 r/m [poslinkis] – CALL adresas (vidinis netiesioginis)</br>
 1111 1111 mod 011 r/m [poslinkis] – CALL adresas (išorinis netiesioginis)</br>
 </br></br>
-Visi RET variantai (4);</br>
+<strong>Visi RET variantai (4);</strong></br>
 1100 0010 bojb bovb – RET betarpiškas operandas; RETN betarpiškas operandas</br>
 1100 0011 – RET; RETN</br>
 1100 1010 bojb bovb – RETF betarpiškas operandas</br>
 1100 1011 – RETF</br>
 1100 1111 – IRET</br>
 </br></br>
-Visi JMP variantai (5);</br>
+<strong>Visi JMP variantai (5);</strong></br>
 1110 1001 pjb pvb – JMP žymė (vidinis tiesioginis)</br>
 1110 1010 ajb avb srjb srvb – JMP žymė (išorinis tiesioginis)</br>
 1110 1011 poslinkis – JMP žymė (vidinis artimas)</br>
 1111 1111 mod 100 r/m [poslinkis] – JMP adresas (vidinis netiesioginis)</br>
 1111 1111 mod 101 r/m [poslinkis] – JMP adresas (išorinis netiesioginis)</br>
 </br></br>
-Visos sąlyginio valdymo perdavimo komandos (17);</br>
+<strong>Visos sąlyginio valdymo perdavimo komandos (17);</strong></br>
 0111 0000 poslinkis – JO žymė</br>
 0111 0001 poslinkis – JNO žymė</br>
 0111 0010 poslinkis – JNAE žymė; JB žymė; JC žymė</br>
@@ -85,10 +85,10 @@ Visos sąlyginio valdymo perdavimo komandos (17);</br>
 0111 1110 poslinkis – JLE žymė; JNG žymė</br>
 0111 1111 poslinkis – JG žymė; JNLE žymė</br>
 </br></br>
-Komanda LOOP;</br>
+<strong>Komanda LOOP;</strong></br>
 1110 0010 poslinkis – LOOP žymė</br>
 </br></br>
-Komanda INT;</br></br>
+<strong>Komanda INT;</strong></br>
 1100 1101 numeris – INT numeris</br>
 </br></br></br></br></br></br>
 <h3>VERTIMAS:</h3>
