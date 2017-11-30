@@ -91,6 +91,7 @@
 <strong>Komanda INT;</strong></br>
 1100 1101 numeris – INT numeris</br>
 </br></br></br></br></br></br>
+<hr>
 <h3>VERTIMAS:</h3>
 akumuliatorius – 2 baitų  AX; 1 baito  AL;</br>
 ajb – adreso jaunesnysis baitas;</br>
@@ -109,7 +110,7 @@ portas – vieno baito dydžio porto numeris</br>
 dx portas – dx reikšmė naudojama kaip porto numeris</br>
 xxx, yyy – naudojama formuojant preprocesoriaus komandos numerį;</br>
 
-
+<hr>
 <h2>Reikalinga paleidimui</h2>
 TASM: http://klevas.mif.vu.lt/~julius/Tools/asm/TASM.zip<br>
 DOS emuliatorius DOSBox: http://www.dosbox.com/<br>
