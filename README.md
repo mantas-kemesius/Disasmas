@@ -11,14 +11,17 @@
 
 </br></br>
 <strong>Visi PUSH variantai (3);</strong></br>
-000sr 110 – PUSH segmento registras</br>
-0101 0reg – PUSH registras (žodinis)</br>
-1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis</br>
+1. 000sr 110 – PUSH segmento registras</br>
+2. 0101 0reg – PUSH registras (žodinis)</br>
+3. 1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis</br>
+1. 06 - 1E  </br>2. 50 - 57 </br>3. FF </br>
 </br></br>
 <strong>Visi POP variantai (3);</strong></br>
-0101 1reg – POP registras (žodinis)</br>
-000sr 111 – POP segmento registras</br>
-1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis</br>
+1. 0101 1reg – POP registras (žodinis)</br>
+2. 000sr 111 – POP segmento registras</br>
+3. 1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis</br>
+1. 58 - 5F  </br>2. 07 - 1F </br>3. 8F </br>
+
 </br></br>
 <strong>Visi ADD variantai (3);</strong></br>
 0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas</br>
