@@ -1,50 +1,92 @@
 .model small
 .stack 100h
 .data
-;-----------------
+;------ Tarpiniai pranesimai
+
     enteris db 13,10,'$'
+    neatp_pradzia db 'db $'
+    neatp_pabaiga db ' ;Neatpazinau komandos$'
 
 
 ;---------------MASININIS KODAS
-      Mas_kodas db 41h, 42h, 43h, 59h,13h
-                db  0h,0ECh, 0CDh,21h, 12h
-                db 26h,74h, 5Ch, 5Fh
+    Mas_kodas db 41h, 42h, 43h, 59h,13h
+              db  0h,0ECh, 0CDh,21h, 12h
+              db 26h,74h, 5Ch, 5Fh
 
 ;----------------DARBINIAI KINTAMIEJI  
 
-      reg_part db ?
-      rm_part db ?
-      mod_part db ?
-      d_part db ?
-      w_part db ?
-      sr_part db ?
+    reg_part db ?
+    rm_part db ?
+    mod_part db ?
+    d_part db ?
+    w_part db ?
+    sr_part db ?
       
-      bojb_baitas db ? ;pasidedam bojb baita 
+    bojb_baitas db ? ;pasidedam bojb baita 
       
-      firstByte db ? ;pasidedam pirma komandos baita
-      secondByte db ? ;pasidedam pirma komandos baita
-      thirdByte db ? ;pasidedam pirma komandos baita
+    firstByte db ? ;pasidedam pirma komandos baita
+    secondByte db ? ;pasidedam pirma komandos baita
+    thirdByte db ? ;pasidedam pirma komandos baita
 
-      format_nr db ? ;dabartines komandos formato numeris
+    format_nr db ? ;dabartines komandos formato numeris
 
 ;---------------SPAUSDINAMU KOMANDU VARDAI
-    k_INC db 'INC $'
-    k_POP db 'POP $'
-    k_INT db 'INT $'
+    c_INC db 'INC $'
+    c_POP db 'POP $'
+    c_INT db 'INT $'
+    c_MOV db 'MOV $'
+    c_PUSH db 'PUSH $'
+    c_POP db 'POP $'
+    c_ADD db 'ADD $'
+    c_DEC db 'DEC $'
+    c_SUB db 'SUB $'
+    c_CMP db 'CMP $'
+    c_MUL db 'MUL $'
+    c_DIV db 'DIV $'
+    c_CALL db 'CALL $'
+    c_RET db 'RET $'
+    
+    c_JMP db 'JMP $'
+    c_JO db 'JO $'
+    c_JNO db 'JNO $'
+    c_JNAE db 'JNAE $'
+    c_JAE db 'JAE $'
+    c_JE db 'JE $'
+    c_JNE db 'JNE $'
+    c_JBE db 'JBE $'
+    c_JA db 'JA $'
+    c_JS db 'JS $'
+    c_JNS db 'JNS $'
+    c_JP db 'JP $'
+    c_JNP db 'JNP $'
+    c_JL db 'JL $'
+    c_JGE db 'JGE $'
+    c_JLE db 'JLE $'
+    c_JG db 'JG $' 
+    
+    c_LOOP db 'LOPP $'
 
 ;---------------SPAUSDINAMU REGISTRU VARDAI
     r_AX db 'ax$'
+    r_AL db 'al$'
+    r_AH db 'ah$'
+    
     r_CX db 'cx$'
+    r_CL db 'cl$'
+    r_CH db 'ch$'
+    
     r_DX db 'dx$'
+    r_DL db 'dl$'
+    r_DH db 'dh$'
+    
     r_BX db 'bx$'
+    r_BL db 'bl$'
+    r_BH db 'bh$'
+    
     r_SP db 'sp$'
     r_BP db 'bp$'
     r_SI db 'si$'
     r_DI db 'di$'
-
-;-------------Kiti pranesimai:
-    neatp_pradzia db 'db $'
-    neatp_pabaiga db ' ;Neatpazinau komandos$'
 
 ;***************************************************************************************************************************************************************
 	
@@ -107,6 +149,7 @@ RET
 
 ;Procedura, pagal pirmo baito reiksme padeta duomenu segmente firstByte vietoje nustato kurio numerio cia formatas
 ;rezultata iraso duomenu_segmente i baita (format_nr)
+
 gauk_formato_nr:
 
     cmp byte ptr[firstByte], 40h
@@ -120,13 +163,13 @@ gauk_formato_nr:
     RET 
 
     gal_antras:
-    cmp byte ptr[firstByte], 0CDh ;ar antras formatas, jo pirmas baitas CD
+    cmp byte ptr[firstByte], 0CDh ;ar antras formatas, jo pirmas baitas CD - (INT)
     je taip_antras
     jmp neatpazintas
 
     taip_antras:
     mov byte ptr[format_nr], 2
-    RE
+    RET
 
     neatpazintas:
     mov byte ptr[format_nr], 0
@@ -138,24 +181,29 @@ RET
 ;Pirma baita jau turim is pagr_ciklo
 ;I reg_part baita duom.segmente pasiimame reg'o reiksme
 ;(pasinaudodami pirmo baito reiksme)
+
 domisi_pirmu:
+
     push ax
         mov al, byte ptr[firstByte]
         and al, 111b
         mov byte ptr[reg_part], al
-    pop ax
+    pop ax 
+    
 RET
 
-;Surenka detales apie antra formata (CD numeris - kur numeris vieno baito betarp.op)
-domisi_antru:
+;Surenka detales apie antra formata (CD numeris - kur numeris vieno baito betarp.op) 
+
+domisi_antru:  
+
    push ax
         call getFirstByte ;gaunam i AL antro baito reiksme
         mov byte ptr[bojb_baitas], al ;pasidedam i pacio disasmo duom segmenta bet.op. baito reiksme
    pop ax
+   
 RET
 
-domisi_nuliniu:
-  
+domisi_nuliniu:  
 RET
 
 ;------------------------------------------------------------------------------------------------------
@@ -166,7 +214,8 @@ RET
 ;*************************************************************************************************************************
 
 ;Procedura, kuri rupinasi asemblerines komandos spausdinimu, kai jau zino formata
-;Realiai ji tik paziuri kuris formatas ir pagal ta spausdina
+;Realiai ji tik paziuri kuris formatas ir pagal ta spausdina    
+
 print_kodoeilute:
     ;pasiziurim, koks dabartines komandos formato numeris buvo nustatytas
     ;pagal tai kvieciam atitinkama procedura
@@ -189,51 +238,7 @@ print_kodoeilute:
         
 ;------------------------------------------------------------------------------------------------------
 
-
-;Spausdina komandos varda pagal pirma baita (bendru atveju pirma baita ir galbut antra, arba antro reg dali)
-spausdink_varda:
-    push ax ;procedura panaudoje nenorim sugadint registru reiksmiu, issisaugom
-    push bx
-    push cx
-    push dx
-
-    ;spejam, kad cia INC (pirmas baitas is intervalo 40-47h)
-    cmp byte ptr[firstByte], 40h
-    jb gal_komanda_pop
-    cmp byte ptr[firstByte], 47h
-    ja gal_komanda_pop
-        ;vis tik cia INC
-        mov bx, offset k_INC
-        jmp vardo_spausdinimas
-
-    ;spejam, kad cia POP (pirmas baitas is intervalo 58-5Fh)
-    gal_komanda_pop:
-    cmp byte ptr[firstByte], 58h
-    jb gal_komanda_int
-    cmp byte ptr[firstByte], 5Fh
-    ja gal_komanda_int
-        ;vis tik cia POP
-        mov bx, offset k_POP
-        jmp vardo_spausdinimas
-
-    gal_komanda_int:
-    cmp byte ptr[firstByte], 0CDh
-    jne returnfrom_vardo_spausd ;griztam is vardo spausdinimo, nes nepazistam komandos
-        mov bx, offset k_INT
-
-    vardo_spausdinimas:
-    mov ah,9
-    mov dx, bx
-    int 21h
-    returnfrom_vardo_spausd:
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-RET
-
-;------------------------------------------------------------------------------------------------------
-
+;****************** GAVUS INFO APIE BAITA ATLIEKAME TAM TIKRUS VEIKSMUS, JOG ATVAIZDUOTUME JI **************************************
 
 print_formatui1:
     push ax
@@ -250,6 +255,8 @@ print_formatui2:
     call print_baita_hexu
     pop ax
 RET
+
+;NEATPAZINTAS------------- ATLIEKAMI SPEC VEIKSMAI BUTENT JAM ---------------------------------------
 
 print_formatui0:
     push ax
@@ -271,6 +278,57 @@ print_formatui0:
 RET
 
 ;------------------------------------------------------------------------------------------------------
+
+
+
+;Spausdina komandos varda pagal pirma baita (bendru atveju pirma baita ir galbut antra, arba antro reg dali)
+
+spausdink_varda:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    ;spejam, kad cia INC (pirmas baitas is intervalo 40-47h)  
+    
+    cmp byte ptr[firstByte], 40h
+    jb gal_komanda_pop
+    cmp byte ptr[firstByte], 47h
+    ja gal_komanda_pop
+    
+    ;vis tik cia INC
+    mov bx, offset c_INC
+    jmp vardo_spausdinimas
+
+    ;spejam, kad cia POP (pirmas baitas is intervalo 58-5Fh)
+    gal_komanda_pop:
+        cmp byte ptr[firstByte], 58h
+        jb gal_komanda_int
+        cmp byte ptr[firstByte], 5Fh
+        ja gal_komanda_int
+        ;vis tik cia POP
+        mov bx, offset c_POP
+        jmp vardo_spausdinimas
+
+    gal_komanda_int:
+        cmp byte ptr[firstByte], 0CDh
+        jne returnfrom_vardo_spausd ;griztam is vardo spausdinimo, nes nepazistam komandos
+        mov bx, offset c_INT
+
+    vardo_spausdinimas:
+        mov ah,9
+        mov dx, bx
+        int 21h       
+    
+    returnfrom_vardo_spausd:
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+RET
+
+;------------------------------------------------------------------------------------------------------
+
 
 ;spausdina konstantos baita sesioliktaine sistema, su h raide po jo
 ;ir nuliu priekyj (nes skaicius negali prasidet raide, paprastumo delei nuli priekyj)
