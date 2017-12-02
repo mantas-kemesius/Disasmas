@@ -7,6 +7,7 @@
     neatp_pradzia db 'db $'
     neatp_pabaiga db ' ;Neatpazinau komandos$'
     temp_for_al db ?
+    byte_for_sreg db ?
 
 
 ;---------------MASININIS KODAS
@@ -21,7 +22,7 @@
     mod_part db ?
     d_part db ?
     w_part db ?
-    sr_part db ?
+    sreg_part db ?
       
     bojb_baitas db ? ;pasidedam bojb baita 
       
@@ -149,7 +150,8 @@ getInfo:
 
 RET
 
-
+;*******************************************************************************************************
+;------ GET D, W FROM FIRST BYTE, MOD FROM SECOND BYTE AND FROM both SReg ----------- 
 getD:
   mov byte ptr[temp_for_al], al 
   mov al, byte ptr[firstByte]
@@ -173,6 +175,15 @@ getMOD:
   mov byte ptr[mod_part], al
   mov al, byte ptr[temp_for_al]
 ret
+
+getSreg:;Jam reikia paduoti baita, kuriame yra sreg (byte_for_sreg)
+ mov byte ptr[temp_for_al], al
+ mov al, byte ptr[byte_for_sreg]
+ and al, 00011000b
+ mov byte ptr[sreg_part], al
+ mov al, byte ptr[temp_for_al]
+ret      
+
 ;------------------------------------------------------------------------------------------------------
 
 ;Procedura, pagal pirmo baito reiksme padeta duomenu segmente firstByte vietoje nustato kurio numerio cia formatas
@@ -272,7 +283,7 @@ print_formatui1:
     push ax
     call spausdink_varda
     mov al, byte ptr[reg_part]
-    call print_reg_w1
+    call print_reg_w1_mod11
     pop ax
 RET
 
@@ -431,83 +442,83 @@ print_hex_skaitmuo:
 RET
 
 
-;------------------------------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------------------------------------------------------------------
+;*******************************************************************************************************************************************
 
-;spausdina zodini registra i ekrana
-;koks tas registras pasakom AL baite (addr. baito lentoj r/m=000-111, mod=11, w=1)
-print_reg_w1:
+; WHEN MOD = 11, w = 0, print reg or r/m  == 000 - 111, IF REG MOD COULD BE FROM 00 - 11
+print_reg_w1_mod11:
     push ax
     push bx
     push cx
     push dx
 
     test al, 100b
-    je reg_w1_0xx
-    jmp reg_w1_1xx
+    je reg_w1_mod11_0xx
+    jmp reg_w1_mod11_1xx
 
-        reg_w1_0xx:
+        reg_w1_mod11_0xx:
         test al, 10b
-        je reg_w1_00x
-        jmp reg_w1_01x
+        je reg_w1_mod11_00x
+        jmp reg_w1_mod11_01x
 
-        reg_w1_1xx:
+        reg_w1_mod11_1xx:
         test al, 10b
-        je reg_w1_10x
-        jmp reg_w1_11x
+        je reg_w1_mod11_10x
+        jmp reg_w1_mod11_11x
 
-            reg_w1_00x:
+            reg_w1_mod11_00x:
             test al, 1b
-            je reg_w1_000
-            jmp reg_w1_001
+            je reg_w1_mod11_000
+            jmp reg_w1_mod11_001
 
-            reg_w1_01x:
+            reg_w1_mod11_01x:
             test al, 1b
-            je reg_w1_010
-            jmp reg_w1_011
+            je reg_w1_mod11_010
+            jmp reg_w1_mod11_011
 
-            reg_w1_10x:
+            reg_w1_mod11_10x:
             test al, 1b
-            je reg_w1_100
-            jmp reg_w1_101
+            je reg_w1_mod11_100
+            jmp reg_w1_mod11_101
 
-            reg_w1_11x:
+            reg_w1_mod11_11x:
             test al, 1b
-            je reg_w1_110
-            jmp reg_w1_111
+            je reg_w1_mod11_110
+            jmp reg_w1_mod11_111
 
-                reg_w1_000:
+                reg_w1_mod11_000:
                 mov bx, offset r_AX
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
 
-                reg_w1_001:
+                reg_w1_mod11_001:
                 mov bx, offset r_CX
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
 
-                reg_w1_010:
+                reg_w1_mod11_010:
                 mov bx, offset r_DX
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
 
-                reg_w1_011:
+                reg_w1_mod11_011:
                 mov bx, offset r_BX
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
                 ;----
-                reg_w1_100:
+                reg_w1_mod11_100:
                 mov bx, offset r_SP
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
 
-                reg_w1_101:
+                reg_w1_mod11_101:
                 mov bx, offset r_BP
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
 
-                reg_w1_110:
+                reg_w1_mod11_110:
                 mov bx, offset r_SI
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
 
-                reg_w1_111:
+                reg_w1_mod11_111:
                 mov bx, offset r_DI
-                jmp reg_w1_spausd
+                jmp reg_w1_mod11_spausd
 
-    reg_w1_spausd:
+    reg_w1_mod11_spausd:
     mov ah, 9
     mov dx, bx
     int 21h
@@ -520,82 +531,169 @@ RET
 
 
 ;------------------------------------------------------------------------------------------------------
+; WHEN MOD = 11, w = 0, print reg or r/m  == 000 - 111, IF REG MOD COULD BE FROM 00 - 11
 
-;spausdina zodini registra i ekrana
-;koks tas registras pasakom AL baite (addr. baito lentoj r/m=000-111, mod=11, w=1)
-print_reg_w0:
+print_reg_w0_mod11:
     push ax
     push bx
     push cx
     push dx
 
     test al, 100b
-    je reg_w0_0xx
-    jmp reg_w0_1xx
+    je reg_w0_mod11_0xx
+    jmp reg_w0_mod11_1xx
 
-        reg_w0_0xx:
+        reg_w0_mod11_0xx:
         test al, 10b
-        je reg_w0_00x
-        jmp reg_w0_01x
+        je reg_w0_mod11_00x
+        jmp reg_w0_mod11_01x
 
-        reg_w0_1xx:
+        reg_w0_mod11_1xx:
         test al, 10b
-        je reg_w0_10x
-        jmp reg_w0_11x
+        je reg_w0_mod11_10x
+        jmp reg_w0_mod11_11x
 
-            reg_w0_00x:
+            reg_w0_mod11_00x:
             test al, 1b
-            je reg_w0_000
-            jmp reg_w0_001
+            je reg_w0_mod11_000
+            jmp reg_w0_mod11_001
 
-            reg_w0_01x:
+            reg_w0_mod11_01x:
             test al, 1b
-            je reg_w0_010
-            jmp reg_w0_011
+            je reg_w0_mod11_010
+            jmp reg_w0_mod11_011
 
-            reg_w0_10x:
+            reg_w0_mod11_10x:
             test al, 1b
-            je reg_w0_100
-            jmp reg_w0_101
+            je reg_w0_mod11_100
+            jmp reg_w0_mod11_101
 
-            reg_w0_11x:
+            reg_w0_mod11_11x:
             test al, 1b
-            je reg_w0_110
-            jmp reg_w0_111
+            je reg_w0_mod11_110
+            jmp reg_w0_mod11_111
 
-                reg_w0_000:
-                mov bx, offset r_AX
-                jmp reg_w0_spausd
+                reg_w0_mod11_000:
+                mov bx, offset r_AL
+                jmp reg_w0_mod11_spausd
 
-                reg_w0_001:
-                mov bx, offset r_CX
-                jmp reg_w0_spausd
+                reg_w0_mod11_001:
+                mov bx, offset r_CL
+                jmp reg_w0_mod11_spausd
 
-                reg_w0_010:
-                mov bx, offset r_DX
-                jmp reg_w0_spausd
+                reg_w0_mod11_010:
+                mov bx, offset r_DL
+                jmp reg_w0_mod11_spausd
 
-                reg_w0_011:
-                mov bx, offset r_BX
-                jmp reg_w0_spausd
+                reg_w0_mod11_011:
+                mov bx, offset r_BL
+                jmp reg_w0_mod11_spausd
                 ;----
-                reg_w0_100:
-                mov bx, offset r_SP
-                jmp reg_w0_spausd
+                reg_w0_mod11_100:
+                mov bx, offset r_AH
+                jmp reg_w0_mod11_spausd
 
-                reg_w0_101:
-                mov bx, offset r_BP
-                jmp reg_w0_spausd
+                reg_w0_mod11_101:
+                mov bx, offset r_CH
+                jmp reg_w0_mod11_spausd
 
-                reg_w0_110:
-                mov bx, offset r_SI
-                jmp reg_w0_spausd
+                reg_w0_mod11_110:
+                mov bx, offset r_DH
+                jmp reg_w0_mod11_spausd
 
-                reg_w0_111:
-                mov bx, offset r_DI
-                jmp reg_w0_spausd
+                reg_w0_mod11_111:
+                mov bx, offset r_BH
+                jmp reg_w0_mod11_spausd
 
-    reg_w0_spausd:
+    reg_w0_mod11_spausd:
+    mov ah, 9
+    mov dx, bx
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+RET
+
+
+
+;------------------------------------------------------------------------------------------------------
+; WHEN MOD = 00, print r/m  == 000 - 111
+
+print_rm_mod00:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    test al, 100b
+    je reg_w0_mod11_0xx
+    jmp reg_w0_mod11_1xx
+
+        reg_w0_mod11_0xx:
+        test al, 10b
+        je reg_w0_mod11_00x
+        jmp reg_w0_mod11_01x
+
+        reg_w0_mod11_1xx:
+        test al, 10b
+        je reg_w0_mod11_10x
+        jmp reg_w0_mod11_11x
+
+            reg_w0_mod11_00x:
+            test al, 1b
+            je reg_w0_mod11_000
+            jmp reg_w0_mod11_001
+
+            reg_w0_mod11_01x:
+            test al, 1b
+            je reg_w0_mod11_010
+            jmp reg_w0_mod11_011
+
+            reg_w0_mod11_10x:
+            test al, 1b
+            je reg_w0_mod11_100
+            jmp reg_w0_mod11_101
+
+            reg_w0_mod11_11x:
+            test al, 1b
+            je reg_w0_mod11_110
+            jmp reg_w0_mod11_111
+
+                reg_w0_mod11_000:
+                mov bx, offset r_AL
+                jmp reg_w0_mod11_spausd
+
+                reg_w0_mod11_001:
+                mov bx, offset r_CL
+                jmp reg_w0_mod11_spausd
+
+                reg_w0_mod11_010:
+                mov bx, offset r_DL
+                jmp reg_w0_mod11_spausd
+
+                reg_w0_mod11_011:
+                mov bx, offset r_BL
+                jmp reg_w0_mod11_spausd
+                ;----
+                reg_w0_mod11_100:
+                mov bx, offset r_AH
+                jmp reg_w0_mod11_spausd
+
+                reg_w0_mod11_101:
+                mov bx, offset r_CH
+                jmp reg_w0_mod11_spausd
+
+                reg_w0_mod11_110:
+                mov bx, offset r_DH
+                jmp reg_w0_mod11_spausd
+
+                reg_w0_mod11_111:
+                mov bx, offset r_BH
+                jmp reg_w0_mod11_spausd
+
+    reg_w0_mod11_spausd:
     mov ah, 9
     mov dx, bx
     int 21h
