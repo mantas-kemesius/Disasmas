@@ -18,7 +18,7 @@
 06 - 1E</br>50 - 57 </br>FF </br>
 </br></br>
 <strong>Visi POP variantai (3);</strong></br>
-0101 1reg – POP registras (žodinis)(+)</br>
+0101 1reg – POP registras (žodinis)(+)*-DONE-*</br>
 000sr 111 – POP segmento registras(+)</br>
 1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis(+)</br>
 58 - 5F</br>07 - 1F</br>8F</br>
@@ -31,7 +31,7 @@
 04 - 05</br>00 - 03</br>80 - 83</br>
 </br></br>
 <strong>Visi INC variantai (2);</strong></br>
-0100 0reg – INC registras (žodinis)(+)</br>
+0100 0reg – INC registras (žodinis)(+)*-DONE-*</br>
 1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis(+)</br>
 40 - 47</br>FE - FF</br>
 </br></br>
