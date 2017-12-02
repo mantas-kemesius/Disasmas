@@ -90,39 +90,24 @@ loop loop2
 	mov dx, offset bufsi
 	int 21h
 
-;********************************************** BAIGIAMAS SKAITYMAS PIRMU SIMBOLIU *****************************************
-	
 	mov cx, ax
+;----------------------cx bus reikalingas iseiti is pagrindinio ciklo
+;----------------------nusinulinu parametrus
 	xor si,si
 	xor bx,bx
 	xor ax,ax
 	xor bx,bx
-	xor dx,dx  
-	
-;********************************************* BAIGIAMAS REGISTRU ISVALYMAS *************************************************
-                                                         
-                                                         
-                                                         
+	xor dx,dx
                                                          
                                                          
 ;****************************************************************************************************************************
 ;============================== PRASIDEDA MAIN LOOP'AS, KURIAME BUS ATLIEKAMAS VISAS DARBAS ================================= 
-;****************************************************************************************************************************  
-                                              
-                                              
+;****************************************************************************************************************************                                          
+    mov si, offset bufsi                                    
     MainLoop:
-    mov senas_si, si
-	call spausdinti_ip
-	call sekos_spausdinimas
-
-
-
-
-
-
-
-
-
+    mov dl, [si]
+    inc si
+    Loop MainLoop
 
 
 
@@ -131,7 +116,22 @@ loop loop2
 ;==================================== PROCEDUROS REIKALINGOS DIRBTI SU DUOMENIMIS ===========================================
 ;****************************************************************************************************************************
 
-
+	pavadinimo_isspausdinimas proc near
+		push cx
+		push si
+		mov cx, 6
+		mov si, ax
+		isspausdinimo_ciklas:
+		mov al, pavadinimai[si]
+		inc si
+		mov bufbx[bx], al
+		inc bx
+		loop isspausdinimo_ciklas
+		pop si
+		pop cx
+		xor ax, ax
+		ret
+	pavadinimo_isspausdinimas endp
 
 
 
