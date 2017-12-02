@@ -6,6 +6,7 @@
     enteris db 13,10,'$'
     neatp_pradzia db 'db $'
     neatp_pabaiga db ' ;Neatpazinau komandos$'
+    temp_for_al db ?
 
 
 ;---------------MASININIS KODAS
@@ -36,7 +37,6 @@
     c_INT db 'INT $'
     c_MOV db 'MOV $'
     c_PUSH db 'PUSH $'
-    c_POP db 'POP $'
     c_ADD db 'ADD $'
     c_DEC db 'DEC $'
     c_SUB db 'SUB $'
@@ -119,12 +119,13 @@ jmp MainLoop
 getFirstByte:
     mov al,[si]
     inc si
+    
     cmp si, di
-
-    ja getFirstByte_temp_jmp
+    ja getFirstByte_temp_jmp_to_end_program   
+    
     jmp getFirstByte_end
 
-    getFirstByte_temp_jmp:
+    getFirstByte_temp_jmp_to_end_program:
     jmp exit
 
     getFirstByte_end:
@@ -133,8 +134,11 @@ getFirstByte:
 ;------------------------------------------------------------------------------------------------------   
 
 ;get data according firstByte AND Procedura surenkanti komandos detales (tarkim d,w,reg,mod,r/m ir kt reiksmes)
-getInfo:   
-
+getInfo:
+   
+    call getD
+    call getW
+    
     call gauk_formato_nr 
 
     cmp byte ptr[format_nr], 1 ;jei formato numeris 1
@@ -145,6 +149,30 @@ getInfo:
 
 RET
 
+
+getD:
+  mov byte ptr[temp_for_al], al 
+  mov al, byte ptr[firstByte]
+  and al, 00000010b
+  mov byte ptr[d_part], al
+  mov al, byte ptr[firstByte]
+ret
+
+getW:
+  mov byte ptr[temp_for_al], al
+  mov al, byte ptr[firstByte]
+  and al, 00000010b
+  mov byte ptr[w_part], al
+  mov al, byte ptr[temp_for_al]
+ret
+
+getMOD:
+  mov byte ptr[temp_for_al], al
+  mov al, byte ptr[secondByte]
+  and al, 11000000b
+  mov byte ptr[mod_part], al
+  mov al, byte ptr[temp_for_al]
+ret
 ;------------------------------------------------------------------------------------------------------
 
 ;Procedura, pagal pirmo baito reiksme padeta duomenu segmente firstByte vietoje nustato kurio numerio cia formatas
@@ -414,68 +442,68 @@ print_reg_w1:
     push dx
 
     test al, 100b
-    je pr_reg_w1_0xx
-    jmp pr_reg_w1_1xx
+    je reg_w1_0xx
+    jmp reg_w1_1xx
 
-        pr_reg_w1_0xx:
+        reg_w1_0xx:
         test al, 10b
-        je pr_reg_w1_00x
-        jmp pr_reg_w1_01x
+        je reg_w1_00x
+        jmp reg_w1_01x
 
-        pr_reg_w1_1xx:
+        reg_w1_1xx:
         test al, 10b
-        je pr_reg_w1_10x
-        jmp pr_reg_w1_11x
+        je reg_w1_10x
+        jmp reg_w1_11x
 
-            pr_reg_w1_00x:
+            reg_w1_00x:
             test al, 1b
-            je pr_reg_w1_000
-            jmp pr_reg_w1_001
+            je reg_w1_000
+            jmp reg_w1_001
 
-            pr_reg_w1_01x:
+            reg_w1_01x:
             test al, 1b
-            je pr_reg_w1_010
-            jmp pr_reg_w1_011
+            je reg_w1_010
+            jmp reg_w1_011
 
-            pr_reg_w1_10x:
+            reg_w1_10x:
             test al, 1b
-            je pr_reg_w1_100
-            jmp pr_reg_w1_101
+            je reg_w1_100
+            jmp reg_w1_101
 
-            pr_reg_w1_11x:
+            reg_w1_11x:
             test al, 1b
-            je pr_reg_w1_110
-            jmp pr_reg_w1_111
+            je reg_w1_110
+            jmp reg_w1_111
 
-                pr_reg_w1_000:
+                reg_w1_000:
                 mov bx, offset r_AX
                 jmp reg_w1_spausd
 
-                pr_reg_w1_001:
+                reg_w1_001:
                 mov bx, offset r_CX
                 jmp reg_w1_spausd
 
-                pr_reg_w1_010:
+                reg_w1_010:
                 mov bx, offset r_DX
                 jmp reg_w1_spausd
 
-                pr_reg_w1_011:
+                reg_w1_011:
                 mov bx, offset r_BX
                 jmp reg_w1_spausd
                 ;----
-                pr_reg_w1_100:
+                reg_w1_100:
                 mov bx, offset r_SP
                 jmp reg_w1_spausd
 
-                pr_reg_w1_101:
+                reg_w1_101:
                 mov bx, offset r_BP
                 jmp reg_w1_spausd
 
-                pr_reg_w1_110:
+                reg_w1_110:
                 mov bx, offset r_SI
                 jmp reg_w1_spausd
 
-                pr_reg_w1_111:
+                reg_w1_111:
                 mov bx, offset r_DI
                 jmp reg_w1_spausd
 
@@ -492,6 +520,91 @@ RET
 
 
 ;------------------------------------------------------------------------------------------------------
+
+;spausdina zodini registra i ekrana
+;koks tas registras pasakom AL baite (addr. baito lentoj r/m=000-111, mod=11, w=1)
+print_reg_w0:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    test al, 100b
+    je reg_w0_0xx
+    jmp reg_w0_1xx
+
+        reg_w0_0xx:
+        test al, 10b
+        je reg_w0_00x
+        jmp reg_w0_01x
+
+        reg_w0_1xx:
+        test al, 10b
+        je reg_w0_10x
+        jmp reg_w0_11x
+
+            reg_w0_00x:
+            test al, 1b
+            je reg_w0_000
+            jmp reg_w0_001
+
+            reg_w0_01x:
+            test al, 1b
+            je reg_w0_010
+            jmp reg_w0_011
+
+            reg_w0_10x:
+            test al, 1b
+            je reg_w0_100
+            jmp reg_w0_101
+
+            reg_w0_11x:
+            test al, 1b
+            je reg_w0_110
+            jmp reg_w0_111
+
+                reg_w0_000:
+                mov bx, offset r_AX
+                jmp reg_w0_spausd
+
+                reg_w0_001:
+                mov bx, offset r_CX
+                jmp reg_w0_spausd
+
+                reg_w0_010:
+                mov bx, offset r_DX
+                jmp reg_w0_spausd
+
+                reg_w0_011:
+                mov bx, offset r_BX
+                jmp reg_w0_spausd
+                ;----
+                reg_w0_100:
+                mov bx, offset r_SP
+                jmp reg_w0_spausd
+
+                reg_w0_101:
+                mov bx, offset r_BP
+                jmp reg_w0_spausd
+
+                reg_w0_110:
+                mov bx, offset r_SI
+                jmp reg_w0_spausd
+
+                reg_w0_111:
+                mov bx, offset r_DI
+                jmp reg_w0_spausd
+
+    reg_w0_spausd:
+    mov ah, 9
+    mov dx, bx
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+RET
 
 
 
