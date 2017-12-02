@@ -67,7 +67,7 @@
     c_JLE db 'JLE $'
     c_JG db 'JG $' 
     
-    c_LOOP db 'LOPP $'
+    c_LOOP db 'LOOP $'
 
 ;---------------SPAUSDINAMU REGISTRU VARDAI
     ea_rm000 db 'bx+si$'
@@ -153,7 +153,8 @@ getFirstByte:
 
 ;get data according firstByte AND Procedura surenkanti komandos detales (tarkim d,w,reg,mod,r/m ir kt reiksmes)
 getInfo:
-   
+
+    ;SIU GALI VELIAU PRIREIKTI
     call getD
     call getW
     
@@ -180,16 +181,25 @@ ret
 getW:
   mov byte ptr[temp_for_al], al
   mov al, byte ptr[firstByte]
-  and al, 00000010b
+  and al, 00000001b
   mov byte ptr[w_part], al
   mov al, byte ptr[temp_for_al]
 ret
 
-getMOD:
+getMOD_REG_RM:
   mov byte ptr[temp_for_al], al
   mov al, byte ptr[secondByte]
   and al, 11000000b
   mov byte ptr[mod_part], al
+  
+  mov al, byte ptr[secondByte]
+  and al, 00111000b
+  mov byte ptr[reg_part], al
+  
+  mov al, byte ptr[secondByte]
+  and al, 00000111b
+  mov byte ptr[rm_part], al
+  
   mov al, byte ptr[temp_for_al]
 ret
 
@@ -273,7 +283,7 @@ RET
 
 ;Surenka detales apie pirma formata (xxxx xreg) - reikalinga REG dalis ir pirmas baitas
 ;Pirma baita jau turim is pagr_ciklo
-;I reg_part baita duom.segmente pasiimame reg'o reiksme
+;I rm_part baita duom.segmente pasiimame reg'o reiksme
 ;(pasinaudodami pirmo baito reiksme)
 
 domisi_pirmu:
@@ -281,7 +291,7 @@ domisi_pirmu:
     push ax
         mov al, byte ptr[firstByte]
         and al, 111b
-        mov byte ptr[reg_part], al
+        mov byte ptr[rm_part], al
     pop ax 
     
 RET
@@ -337,8 +347,8 @@ print_kodoeilute:
 print_formatui1:
     push ax
     call spausdink_varda
-    mov al, byte ptr[reg_part]
-    call print_reg_w1_mod11
+    mov al, byte ptr[rm_part]
+    call print_rm_w1_mod11
     pop ax
 RET
 
@@ -500,80 +510,80 @@ RET
 ;-------------------------------------------------------------------------------------------------------------------------------------------
 ;*******************************************************************************************************************************************
 
-; WHEN MOD = 11, w = 0, print reg or r/m  == 000 - 111, IF REG MOD COULD BE FROM 00 - 11
-print_reg_w1_mod11:
+; FOR REG w = 1
+print_reg_w1:
     push ax
     push bx
     push cx
     push dx
 
-    test al, 100b
-    je reg_w1_mod11_0xx
-    jmp reg_w1_mod11_1xx
+    test al, 00100000b
+    je reg_w1_0xx
+    jmp reg_w1_1xx
 
-        reg_w1_mod11_0xx:
-        test al, 10b
-        je reg_w1_mod11_00x
-        jmp reg_w1_mod11_01x
+        reg_w1_0xx:
+        test al, 00010000b
+        je reg_w1_00x
+        jmp reg_w1_01x
 
-        reg_w1_mod11_1xx:
-        test al, 10b
-        je reg_w1_mod11_10x
-        jmp reg_w1_mod11_11x
+        reg_w1_1xx:
+        test al, 00010000b
+        je reg_w1_10x
+        jmp reg_w1_11x
 
-            reg_w1_mod11_00x:
-            test al, 1b
-            je reg_w1_mod11_000
-            jmp reg_w1_mod11_001
+            reg_w1_00x:
+            test al, 00001000b
+            je reg_w1_000
+            jmp reg_w1_001
 
-            reg_w1_mod11_01x:
-            test al, 1b
-            je reg_w1_mod11_010
-            jmp reg_w1_mod11_011
+            reg_w1_01x:
+            test al, 00001000b
+            je reg_w1_010
+            jmp reg_w1_011
 
-            reg_w1_mod11_10x:
-            test al, 1b
-            je reg_w1_mod11_100
-            jmp reg_w1_mod11_101
+            reg_w1_10x:
+            test al, 00001000b
+            je reg_w1_100
+            jmp reg_w1_101
 
-            reg_w1_mod11_11x:
-            test al, 1b
-            je reg_w1_mod11_110
-            jmp reg_w1_mod11_111
+            reg_w1_11x:
+            test al, 00001000b
+            je reg_w1_110
+            jmp reg_w1_111
 
-                reg_w1_mod11_000:
+                reg_w1_000:
                 mov bx, offset r_AX
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
 
-                reg_w1_mod11_001:
+                reg_w1_001:
                 mov bx, offset r_CX
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
 
-                reg_w1_mod11_010:
+                reg_w1_010:
                 mov bx, offset r_DX
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
 
-                reg_w1_mod11_011:
+                reg_w1_011:
                 mov bx, offset r_BX
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
                 ;----
-                reg_w1_mod11_100:
+                reg_w1_100:
                 mov bx, offset r_SP
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
 
-                reg_w1_mod11_101:
+                reg_w1_101:
                 mov bx, offset r_BP
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
 
-                reg_w1_mod11_110:
+                reg_w1_110:
                 mov bx, offset r_SI
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
 
-                reg_w1_mod11_111:
+                reg_w1_111:
                 mov bx, offset r_DI
-                jmp reg_w1_mod11_spausd
+                jmp reg_w1_spausd
 
-    reg_w1_mod11_spausd:
+    reg_w1_spausd:
     mov ah, 9
     mov dx, bx
     int 21h
@@ -586,7 +596,7 @@ RET
 
 
 ;------------------------------------------------------------------------------------------------------
-; WHEN MOD = 11, w = 0, print reg or r/m  == 000 - 111, IF REG MOD COULD BE FROM 00 - 11
+; FOR REG w = 0
 
 print_reg_w0_mod11:
     push ax
@@ -594,73 +604,252 @@ print_reg_w0_mod11:
     push cx
     push dx
 
-    test al, 100b
-    je reg_w0_mod11_0xx
-    jmp reg_w0_mod11_1xx
+    test al, 00100000b
+    je reg_w0_0xx
+    jmp reg_w0_1xx
 
-        reg_w0_mod11_0xx:
-        test al, 10b
-        je reg_w0_mod11_00x
-        jmp reg_w0_mod11_01x
+        reg_w0_0xx:
+        test al, 00010000b
+        je reg_w0_00x
+        jmp reg_w0_01x
 
-        reg_w0_mod11_1xx:
-        test al, 10b
-        je reg_w0_mod11_10x
-        jmp reg_w0_mod11_11x
+        reg_w0_1xx:
+        test al, 00010000b
+        je reg_w0_10x
+        jmp reg_w0_11x
 
-            reg_w0_mod11_00x:
-            test al, 1b
-            je reg_w0_mod11_000
-            jmp reg_w0_mod11_001
+            reg_w0_00x:
+            test al, 00001000b
+            je reg_w0_000
+            jmp reg_w0_001
 
-            reg_w0_mod11_01x:
-            test al, 1b
-            je reg_w0_mod11_010
-            jmp reg_w0_mod11_011
+            reg_w0_01x:
+            test al, 00001000b
+            je reg_w0_010
+            jmp reg_w0_011
 
-            reg_w0_mod11_10x:
-            test al, 1b
-            je reg_w0_mod11_100
-            jmp reg_w0_mod11_101
+            reg_w0_10x:
+            test al, 00001000b
+            je reg_w0_100
+            jmp reg_w0_101
 
-            reg_w0_mod11_11x:
-            test al, 1b
-            je reg_w0_mod11_110
-            jmp reg_w0_mod11_111
+            reg_w0_11x:
+            test al, 00001000b
+            je reg_w0_110
+            jmp reg_w0_111
 
-                reg_w0_mod11_000:
+                reg_w0_000:
                 mov bx, offset r_AL
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
 
-                reg_w0_mod11_001:
+                reg_w0_001:
                 mov bx, offset r_CL
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
 
-                reg_w0_mod11_010:
+                reg_w0_010:
                 mov bx, offset r_DL
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
 
-                reg_w0_mod11_011:
+                reg_w0_011:
                 mov bx, offset r_BL
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
                 ;----
-                reg_w0_mod11_100:
+                reg_w0_100:
                 mov bx, offset r_AH
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
 
-                reg_w0_mod11_101:
+                reg_w0_101:
                 mov bx, offset r_CH
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
 
-                reg_w0_mod11_110:
+                reg_w0_110:
                 mov bx, offset r_DH
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
 
-                reg_w0_mod11_111:
+                reg_w0_111:
                 mov bx, offset r_BH
-                jmp reg_w0_mod11_spausd
+                jmp reg_w0_spausd
 
-    reg_w0_mod11_spausd:
+    reg_w0_spausd:
+    mov ah, 9
+    mov dx, bx
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+RET
+
+
+
+
+
+
+
+
+
+; WHEN MOD = 11, w = 0, print r/m  == 000 - 111
+print_rm_w1_mod11:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    test al, 100b
+    je rm_w1_mod11_0xx
+    jmp rm_w1_mod11_1xx
+
+        rm_w1_mod11_0xx:
+        test al, 10b
+        je rm_w1_mod11_00x
+        jmp rm_w1_mod11_01x
+
+        rm_w1_mod11_1xx:
+        test al, 10b
+        je rm_w1_mod11_10x
+        jmp rm_w1_mod11_11x
+
+            rm_w1_mod11_00x:
+            test al, 1b
+            je rm_w1_mod11_000
+            jmp rm_w1_mod11_001
+
+            rm_w1_mod11_01x:
+            test al, 1b
+            je rm_w1_mod11_010
+            jmp rm_w1_mod11_011
+
+            rm_w1_mod11_10x:
+            test al, 1b
+            je rm_w1_mod11_100
+            jmp rm_w1_mod11_101
+
+            rm_w1_mod11_11x:
+            test al, 1b
+            je rm_w1_mod11_110
+            jmp rm_w1_mod11_111
+
+                rm_w1_mod11_000:
+                mov bx, offset r_AX
+                jmp rm_w1_mod11_spausd
+
+                rm_w1_mod11_001:
+                mov bx, offset r_CX
+                jmp rm_w1_mod11_spausd
+
+                rm_w1_mod11_010:
+                mov bx, offset r_DX
+                jmp rm_w1_mod11_spausd
+
+                rm_w1_mod11_011:
+                mov bx, offset r_BX
+                jmp rm_w1_mod11_spausd
+                ;----
+                rm_w1_mod11_100:
+                mov bx, offset r_SP
+                jmp rm_w1_mod11_spausd
+
+                rm_w1_mod11_101:
+                mov bx, offset r_BP
+                jmp rm_w1_mod11_spausd
+
+                rm_w1_mod11_110:
+                mov bx, offset r_SI
+                jmp rm_w1_mod11_spausd
+
+                rm_w1_mod11_111:
+                mov bx, offset r_DI
+                jmp rm_w1_mod11_spausd
+
+    rm_w1_mod11_spausd:
+    mov ah, 9
+    mov dx, bx
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+RET
+
+
+;------------------------------------------------------------------------------------------------------
+; WHEN MOD = 11, w = 0 r/m  == 000 - 111
+
+print_rm_w0_mod11:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    test al, 100b
+    je rm_w0_mod11_0xx
+    jmp rm_w0_mod11_1xx
+
+        rm_w0_mod11_0xx:
+        test al, 10b
+        je rm_w0_mod11_00x
+        jmp rm_w0_mod11_01x
+
+        rm_w0_mod11_1xx:
+        test al, 10b
+        je rm_w0_mod11_10x
+        jmp rm_w0_mod11_11x
+
+            rm_w0_mod11_00x:
+            test al, 1b
+            je rm_w0_mod11_000
+            jmp rm_w0_mod11_001
+
+            rm_w0_mod11_01x:
+            test al, 1b
+            je rm_w0_mod11_010
+            jmp rm_w0_mod11_011
+
+            rm_w0_mod11_10x:
+            test al, 1b
+            je rm_w0_mod11_100
+            jmp rm_w0_mod11_101
+
+            rm_w0_mod11_11x:
+            test al, 1b
+            je rm_w0_mod11_110
+            jmp rm_w0_mod11_111
+
+                rm_w0_mod11_000:
+                mov bx, offset r_AL
+                jmp rm_w0_mod11_spausd
+
+                rm_w0_mod11_001:
+                mov bx, offset r_CL
+                jmp rm_w0_mod11_spausd
+
+                rm_w0_mod11_010:
+                mov bx, offset r_DL
+                jmp rm_w0_mod11_spausd
+
+                rm_w0_mod11_011:
+                mov bx, offset r_BL
+                jmp rm_w0_mod11_spausd
+                ;----
+                rm_w0_mod11_100:
+                mov bx, offset r_AH
+                jmp rm_w0_mod11_spausd
+
+                rm_w0_mod11_101:
+                mov bx, offset r_CH
+                jmp rm_w0_mod11_spausd
+
+                rm_w0_mod11_110:
+                mov bx, offset r_DH
+                jmp rm_w0_mod11_spausd
+
+                rm_w0_mod11_111:
+                mov bx, offset r_BH
+                jmp rm_w0_mod11_spausd
+
+    rm_w0_mod11_spausd:
     mov ah, 9
     mov dx, bx
     int 21h
