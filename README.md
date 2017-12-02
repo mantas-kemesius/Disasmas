@@ -105,7 +105,7 @@ B0</br>B1</br>B2</br>B3</br>B4</br>B5</br>B6</br>B7</br>B8</br>B9</br>BA</br>BB<
 D2</br>
 </br></br>
 <strong>Komanda INT;</strong></br>
-1100 1101 numeris – INT numeris(+)</br>
+1100 1101 numeris – INT numeris (+)  *DONE*</br>
 CD</br>
 </br></br></br></br></br></br>
 <hr>
