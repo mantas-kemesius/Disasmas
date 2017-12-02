@@ -23,6 +23,8 @@
     d_part db ?
     w_part db ?
     sreg_part db ?
+    
+    prefix_nr db ? ; IF = 0 - NETURI   1 - ES   2 - CS  3 - SS  4 - DS
       
     bojb_baitas db ? ;pasidedam bojb baita 
       
@@ -68,6 +70,21 @@
     c_LOOP db 'LOPP $'
 
 ;---------------SPAUSDINAMU REGISTRU VARDAI
+    ea_rm000 db 'bx+si$'
+    ea_rm001 db 'bx+di$'
+    ea_rm010 db 'bp+si$'
+    ea_rm011 db 'bp+di$'
+    ea_rm100 db 'si$'
+    ea_rm101 db 'di$'
+    ea_rm110 db 'bp$';kai mod=00 ir r/m = 110, tai tiesioginis
+    ea_rm111 db 'bx$'
+    
+
+    t_ES db 'es$'
+    t_CS db 'ds$'
+    t_SS db 'ss$'
+    t_DS db 'ds$'
+
     r_AX db 'ax$'
     r_AL db 'al$'
     r_AH db 'ah$'
@@ -182,6 +199,44 @@ getSreg:;Jam reikia paduoti baita, kuriame yra sreg (byte_for_sreg)
  and al, 00011000b
  mov byte ptr[sreg_part], al
  mov al, byte ptr[temp_for_al]
+ret
+
+check_meybe_set_prefix:
+ mov byte ptr[temp_for_al], al
+ mov al, byte ptr[firstByte]
+ 
+ cmp al, 26h
+    je set_ES
+ cmp al, 2Eh
+    je set_CS
+ cmp al, 36h
+    je set_SS
+ cmp al, 3Eh
+    je set_DS
+    
+ mov byte ptr[prefix_nr], 0
+    
+ jmp end_of_check_meybe_set_prefix ;JEIGU NERA, TIESIOG JMP I PROCEDUROS PABAIGA
+ 
+ set_ES:
+    mov byte ptr[prefix_nr], 1
+    jmp end_of_check_meybe_set_prefix 
+    
+ set_CS:
+    mov byte ptr[prefix_nr], 2
+    jmp end_of_check_meybe_set_prefix
+    
+ set_SS:
+    mov byte ptr[prefix_nr], 3
+    jmp end_of_check_meybe_set_prefix
+    
+ set_DS:
+    mov byte ptr[prefix_nr], 4
+    jmp end_of_check_meybe_set_prefix      
+ 
+ 
+ end_of_check_meybe_set_prefix:
+    mov al, byte ptr[temp_for_al]
 ret      
 
 ;------------------------------------------------------------------------------------------------------
@@ -662,35 +717,35 @@ print_rm_mod00:
             jmp rm_mod00_111
 
                 rm_mod00_000:
-                mov bx, offset r_AL
+                mov bx, offset ea_rm000
                 jmp rm_mod00_spausd
 
                 rm_mod00_001:
-                mov bx, offset r_CL
+                mov bx, offset ea_rm001
                 jmp rm_mod00_spausd
 
                 rm_mod00_010:
-                mov bx, offset r_DL
+                mov bx, offset ea_rm010
                 jmp rm_mod00_spausd
 
                 rm_mod00_011:
-                mov bx, offset r_BL
+                mov bx, offset ea_rm011
                 jmp rm_mod00_spausd
                 ;----
                 rm_mod00_100:
-                mov bx, offset r_AH
+                mov bx, offset ea_rm100
                 jmp rm_mod00_spausd
 
                 rm_mod00_101:
-                mov bx, offset r_CH
+                mov bx, offset ea_rm101
                 jmp rm_mod00_spausd
 
                 rm_mod00_110:
-                mov bx, offset r_DH
+                mov bx, offset ea_rm110 ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
                 jmp rm_mod00_spausd
 
                 rm_mod00_111:
-                mov bx, offset r_BH
+                mov bx, offset ea_rm111
                 jmp rm_mod00_spausd
 
     rm_mod00_spausd:
@@ -704,7 +759,177 @@ print_rm_mod00:
     pop ax
 RET
 
+;------------------------------------------------------------------------------------------------------
+; WHEN MOD = 01, print r/m  == 000 - 111
 
+print_rm_mod01:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    test al, 100b
+    je rm_mod01_0xx
+    jmp rm_mod01_1xx
+
+        rm_mod01_0xx:
+        test al, 10b
+        je rm_mod01_00x
+        jmp rm_mod01_01x
+
+        rm_mod01_1xx:
+        test al, 10b
+        je rm_mod01_10x
+        jmp rm_mod01_11x
+
+            rm_mod01_00x:
+            test al, 1b
+            je rm_mod01_000
+            jmp rm_mod01_001
+
+            rm_mod01_01x:
+            test al, 1b
+            je rm_mod01_010
+            jmp rm_mod01_011
+
+            rm_mod01_10x:
+            test al, 1b
+            je rm_mod01_100
+            jmp rm_mod01_101
+
+            rm_mod01_11x:
+            test al, 1b
+            je rm_mod01_110
+            jmp rm_mod01_111
+
+                rm_mod01_000:
+                mov bx, offset ea_rm000
+                jmp rm_mod01_spausd
+
+                rm_mod01_001:
+                mov bx, offset ea_rm001
+                jmp rm_mod01_spausd
+
+                rm_mod01_010:
+                mov bx, offset ea_rm010
+                jmp rm_mod01_spausd
+
+                rm_mod01_011:
+                mov bx, offset ea_rm011
+                jmp rm_mod01_spausd
+                ;----
+                rm_mod01_100:
+                mov bx, offset ea_rm100
+                jmp rm_mod01_spausd
+
+                rm_mod01_101:
+                mov bx, offset ea_rm101
+                jmp rm_mod01_spausd
+
+                rm_mod01_110:
+                mov bx, offset ea_rm110 ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+                jmp rm_mod01_spausd
+
+                rm_mod01_111:
+                mov bx, offset ea_rm111
+                jmp rm_mod01_spausd
+
+    rm_mod01_spausd:
+    mov ah, 9
+    mov dx, bx
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+RET
+
+;------------------------------------------------------------------------------------------------------
+; WHEN MOD = 10, print r/m  == 000 - 111
+
+print_rm_mod10:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    test al, 100b
+    je rm_mod10_0xx
+    jmp rm_mod10_1xx
+
+        rm_mod10_0xx:
+        test al, 10b
+        je rm_mod10_00x
+        jmp rm_mod10_01x
+
+        rm_mod10_1xx:
+        test al, 10b
+        je rm_mod10_10x
+        jmp rm_mod10_11x
+
+            rm_mod10_00x:
+            test al, 1b
+            je rm_mod10_000
+            jmp rm_mod10_001
+
+            rm_mod10_01x:
+            test al, 1b
+            je rm_mod10_010
+            jmp rm_mod10_011
+
+            rm_mod10_10x:
+            test al, 1b
+            je rm_mod10_100
+            jmp rm_mod10_101
+
+            rm_mod10_11x:
+            test al, 1b
+            je rm_mod10_110
+            jmp rm_mod10_111
+
+                rm_mod10_000:
+                mov bx, offset ea_rm000
+                jmp rm_mod10_spausd
+
+                rm_mod10_001:
+                mov bx, offset ea_rm001
+                jmp rm_mod10_spausd
+
+                rm_mod10_010:
+                mov bx, offset ea_rm010
+                jmp rm_mod10_spausd
+
+                rm_mod10_011:
+                mov bx, offset ea_rm011
+                jmp rm_mod10_spausd
+                ;----
+                rm_mod10_100:
+                mov bx, offset ea_rm100
+                jmp rm_mod10_spausd
+
+                rm_mod10_101:
+                mov bx, offset ea_rm101
+                jmp rm_mod10_spausd
+
+                rm_mod10_110:
+                mov bx, offset ea_rm110 ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+                jmp rm_mod10_spausd
+
+                rm_mod10_111:
+                mov bx, offset ea_rm111
+                jmp rm_mod10_spausd
+
+    rm_mod10_spausd:
+    mov ah, 9
+    mov dx, bx
+    int 21h
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+RET
 
 exit:
     mov ah, 9
