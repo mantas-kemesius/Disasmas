@@ -6,15 +6,22 @@
     enteris db 13,10,'$'
     neatp_pradzia db 'db $'
     neatp_pabaiga db ' ;Neatpazinau komandos$'
+    k_ db ', $'
+    sonk_ db '[$'
+    sond_ db ']$'
+    pliusas_ db '+$'
     temp_for_al db ?
     byte_for_sreg db ?
 
 
 ;---------------MASININIS KODAS
-    Mas_kodas db 41h, 42h, 43h, 59h,13h
+   ; Mas_kodas db 41h, 42h, 43h, 59h,13h
+    ;          db  0h,0ECh, 0CDh,21h, 12h
+     ;         db 26h,74h, 5Ch, 5Fh  
+              
+    Mas_kodas db 8Bh, 40h, 23h, 59h,13h
               db  0h,0ECh, 0CDh,21h, 12h
               db 26h,74h, 5Ch, 5Fh
-
 ;----------------DARBINIAI KINTAMIEJI  
 
     reg_part db ?
@@ -26,7 +33,8 @@
     
     prefix_nr db ? ; IF = 0 - NETURI   1 - ES   2 - CS  3 - SS  4 - DS
       
-    bojb_baitas db ? ;pasidedam bojb baita 
+    bojb_baitas db ?   
+    bovb_baitas db ?
       
     firstByte db ? ;pasidedam pirma komandos baita
     secondByte db ? ;pasidedam pirma komandos baita
@@ -124,7 +132,7 @@ MainLoop:
     mov byte ptr[firstByte], al
 
     call getInfo
-    call print_kodoeilute
+    call print_kodo_eilute
 	
     mov ah, 9
     mov dx, offset enteris
@@ -151,11 +159,9 @@ getFirstByte:
 
 ;------------------------------------------------------------------------------------------------------   
 
-;get data according firstByte AND Procedura surenkanti komandos detales (tarkim d,w,reg,mod,r/m ir kt reiksmes)
 getInfo:
 
-    ;SIU GALI VELIAU PRIREIKTI
-    call getD
+    call getD_S
     call getW
     
     call gauk_formato_nr 
@@ -164,102 +170,21 @@ getInfo:
     je domisi_pirmu
     cmp byte ptr[format_nr], 2 ;jei formato numeris 2
     je domisi_antru
+    cmp byte ptr[format_nr], 3 ;jei formatas (mod reg r/m)
+    je domisi_treciu
     jmp domisi_nuliniu ;kai netiko ne vienas atvejis
 
 RET
 
-;*******************************************************************************************************
-;------ GET D, W FROM FIRST BYTE, MOD FROM SECOND BYTE AND FROM both SReg ----------- 
-getD:
-  mov byte ptr[temp_for_al], al 
-  mov al, byte ptr[firstByte]
-  and al, 00000010b
-  mov byte ptr[d_part], al
-  mov al, byte ptr[firstByte]
-ret
-
-getW:
-  mov byte ptr[temp_for_al], al
-  mov al, byte ptr[firstByte]
-  and al, 00000001b
-  mov byte ptr[w_part], al
-  mov al, byte ptr[temp_for_al]
-ret
-
-getMOD_REG_RM:
-  mov byte ptr[temp_for_al], al
-  mov al, byte ptr[secondByte]
-  and al, 11000000b
-  mov byte ptr[mod_part], al
-  
-  mov al, byte ptr[secondByte]
-  and al, 00111000b
-  mov byte ptr[reg_part], al
-  
-  mov al, byte ptr[secondByte]
-  and al, 00000111b
-  mov byte ptr[rm_part], al
-  
-  mov al, byte ptr[temp_for_al]
-ret
-
-getSreg:;Jam reikia paduoti baita, kuriame yra sreg (byte_for_sreg)
- mov byte ptr[temp_for_al], al
- mov al, byte ptr[byte_for_sreg]
- and al, 00011000b
- mov byte ptr[sreg_part], al
- mov al, byte ptr[temp_for_al]
-ret
-
-check_meybe_set_prefix:
- mov byte ptr[temp_for_al], al
- mov al, byte ptr[firstByte]
- 
- cmp al, 26h
-    je set_ES
- cmp al, 2Eh
-    je set_CS
- cmp al, 36h
-    je set_SS
- cmp al, 3Eh
-    je set_DS
-    
- mov byte ptr[prefix_nr], 0
-    
- jmp end_of_check_meybe_set_prefix ;JEIGU NERA, TIESIOG JMP I PROCEDUROS PABAIGA
- 
- set_ES:
-    mov byte ptr[prefix_nr], 1
-    jmp end_of_check_meybe_set_prefix 
-    
- set_CS:
-    mov byte ptr[prefix_nr], 2
-    jmp end_of_check_meybe_set_prefix
-    
- set_SS:
-    mov byte ptr[prefix_nr], 3
-    jmp end_of_check_meybe_set_prefix
-    
- set_DS:
-    mov byte ptr[prefix_nr], 4
-    jmp end_of_check_meybe_set_prefix      
- 
- 
- end_of_check_meybe_set_prefix:
-    mov al, byte ptr[temp_for_al]
-ret      
-
 ;------------------------------------------------------------------------------------------------------
-
-;Procedura, pagal pirmo baito reiksme padeta duomenu segmente firstByte vietoje nustato kurio numerio cia formatas
-;rezultata iraso duomenu_segmente i baita (format_nr)
+;Mazdaug atrenkame i kuria puse ziureti
 
 gauk_formato_nr:
-
+    
     cmp byte ptr[firstByte], 40h
-    jb gal_antras
+        jb gal_antras
     cmp byte ptr[firstByte], 5Fh
-    ja gal_antras
+        ja gal_antras
 
     ;patekom i intervala 40h-5Fh
     ;reiskia pirmas formatas
@@ -267,25 +192,42 @@ gauk_formato_nr:
     RET 
 
     gal_antras:
-    cmp byte ptr[firstByte], 0CDh ;ar antras formatas, jo pirmas baitas CD - (INT)
-    je taip_antras
+        cmp byte ptr[firstByte], 0CDh ;ar antras formatas, jo pirmas baitas CD - (INT)
+        je taip_antras
+    
+    gal_trecias: ;kai (mod reg r/m) MOV
+        cmp byte ptr[firstByte], 88h
+            jge gal_trecias_interval
+            jmp gauk_formato_nr_next
+            gal_trecias_interval:
+                cmp byte ptr[firstByte], 8Bh
+                    jle taip_trecias
+    
+    
+    
+    
+    
+    
+    gauk_formato_nr_next:
+    
+    
     jmp neatpazintas
-
+    
+    taip_trecias:
+        mov byte ptr[format_nr], 3
+        RET    
+        
     taip_antras:
-    mov byte ptr[format_nr], 2
-    RET
+        mov byte ptr[format_nr], 2
+        RET
 
     neatpazintas:
-    mov byte ptr[format_nr], 0
-RET            
+        mov byte ptr[format_nr], 0
+        RET            
 
 ;------------------------------------------------------------------------------------------------------
 
-;Surenka detales apie pirma formata (xxxx xreg) - reikalinga REG dalis ir pirmas baitas
-;Pirma baita jau turim is pagr_ciklo
-;I rm_part baita duom.segmente pasiimame reg'o reiksme
-;(pasinaudodami pirmo baito reiksme)
-
+;(xxxx xreg)
 domisi_pirmu:
 
     push ax
@@ -296,13 +238,25 @@ domisi_pirmu:
     
 RET
 
-;Surenka detales apie antra formata (CD numeris - kur numeris vieno baito betarp.op) 
-
+;INT (xxxx xxxx) - bojb
 domisi_antru:  
 
    push ax
         call getFirstByte ;gaunam i AL antro baito reiksme
         mov byte ptr[bojb_baitas], al ;pasidedam i pacio disasmo duom segmenta bet.op. baito reiksme
+   pop ax
+   
+RET
+
+;(xxxx xxxx mod reg r/m)
+domisi_treciu:
+
+   push ax
+        call getFirstByte
+        mov byte ptr[secondByte], al
+        call getMOD
+        call getREG
+        call getRM 
    pop ax
    
 RET
@@ -316,17 +270,18 @@ RET
 ;*************************************************************************************************************************
 ;=========================================================================================================================
 ;*************************************************************************************************************************
+;Kai zinome i kuria puse ziureti, nukreipiame i ten, kur masininis kodas bus dar konkreciau tikrinamas ir tada spausdinamas
 
-;Procedura, kuri rupinasi asemblerines komandos spausdinimu, kai jau zino formata
-;Realiai ji tik paziuri kuris formatas ir pagal ta spausdina    
+print_kodo_eilute:
 
-print_kodoeilute:
-    ;pasiziurim, koks dabartines komandos formato numeris buvo nustatytas
-    ;pagal tai kvieciam atitinkama procedura
     cmp byte ptr[format_nr], 1
-    je pr_kod_kviesk1
+        je pr_kod_kviesk1
     cmp byte ptr[format_nr], 2
-    je pr_kod_kviesk2
+        je pr_kod_kviesk2
+    cmp byte ptr[format_nr], 3
+        je pr_kod_kviesk3
+        
+        
     jmp pr_kod_kviesk0
 
     pr_kod_kviesk1:
@@ -334,16 +289,21 @@ print_kodoeilute:
         RET
     pr_kod_kviesk2:
         call print_formatui2
+        RET                
+        
+    pr_kod_kviesk3:
+        call print_formatui3
         RET
+            
     pr_kod_kviesk0:
         call print_formatui0
         RET    
         
-        
-;------------------------------------------------------------------------------------------------------
 
 ;****************** GAVUS INFO APIE BAITA ATLIEKAME TAM TIKRUS VEIKSMUS, JOG ATVAIZDUOTUME JI **************************************
-
+    
+    
+    
 print_formatui1:
     push ax
     call spausdink_varda
@@ -359,6 +319,125 @@ print_formatui2:
     call print_baita_hexu
     pop ax
 RET
+
+print_formatui3: ;formatui (mod reg r/m)
+    push ax
+    call spausdink_varda
+    cmp d_part, 0h
+        je format3_reg_antras
+        
+    format3_reg_pirmas:;DARBAS SU REG
+        cmp w_part, 0h
+            je format3_reg_pirmas_byte
+            
+        format3_reg_pirmas_word:
+            mov al, byte ptr[secondByte]
+            call print_reg_w1
+            mov ah, 9
+            mov dx, offset k_
+            int 21h
+            jmp format3_reg_antras
+        format3_reg_pirmas_byte:
+            mov al, byte ptr[secondByte]
+            call print_reg_w0
+            mov ah, 9
+            mov dx, offset k_
+            int 21h
+             
+    format3_reg_antras:;DARBAS SU R/M
+        mov ah, 9
+        mov dx, offset sonk_
+        int 21h
+        mov al, byte ptr[secondByte]
+        call spausdink_pagal_mod
+        cmp mod_part, 0C0h
+            je format3_lastCheck
+        cmp mod_part, 0h
+            je format3_lastCheck   
+                    
+                    
+    format3_poslinkis:
+        call getFirstByte
+        mov ah, 9
+        mov dx, offset pliusas_
+        int 21h
+        call print_baita_hexu
+        
+    format3_lastCheck:
+        mov ah, 9
+        mov dx, offset sond_
+        int 21h
+        mov dx, offset k_
+        int 21h
+            
+        cmp d_part, 0h
+            je format3_reg_pirmas_second         
+        jmp format3_end
+                               
+                               
+                                                          
+    format3_reg_pirmas_second:;DARBAS SU REG
+        cmp w_part, 0h
+            je format3_reg_pirmas_second_byte
+            
+        format3_reg_pirmas_second_word:
+            mov al, byte ptr[secondByte]
+            call print_reg_w1
+            jmp format3_end
+            
+        format3_reg_pirmas_second_byte:
+            mov al, byte ptr[secondByte]
+            call print_reg_w0 
+            
+            
+                 
+          
+    format3_end:
+        pop ax
+RET
+
+spausdink_pagal_mod:
+
+   cmp mod_part, 00h
+        je mod_00
+   cmp mod_part, 04h
+        je mod_01
+   cmp mod_part, 08h
+        je mod_10
+   cmp mod_part, 0C0h
+        je mod_11
+   
+   mod_00:
+     call print_rm_mod00
+     jmp spausdink_pagal_mod_end   
+   mod_01:
+     call print_rm_mod01
+     jmp spausdink_pagal_mod_end
+    
+   mod_10:
+     call print_rm_mod10
+     jmp spausdink_pagal_mod_end
+    
+   mod_11:
+     cmp w_part, 0h
+        je spausdink_pagal_mod11_w0
+     jmp spausdink_pagal_mod11_w1 
+     
+   
+   spausdink_pagal_mod11_w0:
+      call print_rm_w0_mod11
+      jmp spausdink_pagal_mod_end
+      
+   spausdink_pagal_mod11_w1:
+      call print_rm_w1_mod11
+      jmp spausdink_pagal_mod_end    
+   
+    
+spausdink_pagal_mod_end:
+RET
+
+
+
 
 ;NEATPAZINTAS------------- ATLIEKAMI SPEC VEIKSMAI BUTENT JAM ---------------------------------------
 
@@ -392,19 +471,30 @@ spausdink_varda:
     push bx
     push cx
     push dx
-
+                                                              
+     cmp byte ptr[firstByte], 88h
+        jge spausdink_varda_interval1
+           jmp gauk_formato_nr_next
+           spausdink_varda_interval1:
+                cmp byte ptr[firstByte], 8Bh
+                    jle gal_komanda_mov                                                         
+                                                              
+                                                              
     ;spejam, kad cia INC (pirmas baitas is intervalo 40-47h)  
-    
     cmp byte ptr[firstByte], 40h
     jb gal_komanda_pop
     cmp byte ptr[firstByte], 47h
     ja gal_komanda_pop
     
-    ;vis tik cia INC
+    
     mov bx, offset c_INC
-    jmp vardo_spausdinimas
-
-    ;spejam, kad cia POP (pirmas baitas is intervalo 58-5Fh)
+    jmp vardo_spausdinimas 
+    
+    
+    gal_komanda_mov:
+        mov bx, offset c_MOV  
+        jmp vardo_spausdinimas
+    
     gal_komanda_pop:
         cmp byte ptr[firstByte], 58h
         jb gal_komanda_int
@@ -433,12 +523,6 @@ RET
 
 ;------------------------------------------------------------------------------------------------------
 
-
-;spausdina konstantos baita sesioliktaine sistema, su h raide po jo
-;ir nuliu priekyj (nes skaicius negali prasidet raide, paprastumo delei nuli priekyj)
-;prirasau visais atvejais, ir kai raide ir kai skaicius
-;ENTRY: AL (AL spausdina AL padeta 16taini skaiciu)
-;Naudojantis loginiu funkciju savybem nedarau konversijos su dalyba :)
 print_baita_hexu:
    push ax
    push bx
@@ -472,8 +556,6 @@ print_baita_hexu:
    pop ax
 RET
 
-;Spausdina i ekrana nurodyta sesioliktaini skaitmeni
-;(ta skaitmeni randa jaunesniam AL pusbaityj)
 print_hex_skaitmuo:
     push ax
     push dx
@@ -507,8 +589,10 @@ print_hex_skaitmuo:
 RET
 
 
-;-------------------------------------------------------------------------------------------------------------------------------------------
 ;*******************************************************************************************************************************************
+;===================================== PRASIDEDA ILGOSIOS PROCEDUROS, GETTERIAI ============================================================
+;*******************************************************************************************************************************************
+
 
 ; FOR REG w = 1
 print_reg_w1:
@@ -598,7 +682,7 @@ RET
 ;------------------------------------------------------------------------------------------------------
 ; FOR REG w = 0
 
-print_reg_w0_mod11:
+print_reg_w0:
     push ax
     push bx
     push cx
@@ -1118,7 +1202,142 @@ print_rm_mod10:
     pop cx
     pop bx
     pop ax
-RET
+RET 
+
+
+
+
+;*******************************************************************************************************
+;GETTERIAI
+;------ GET D, W FROM FIRST BYTE, MOD REG AND R/M FROM SECOND BYTE AND FROM both SReg -----------    
+  
+  
+getD_S:
+  mov byte ptr[temp_for_al], al 
+  and al, 00000010b
+  mov byte ptr[d_part], al
+  mov al, byte ptr[firstByte]
+ret
+     
+   
+   
+   
+     
+getW:
+  mov byte ptr[temp_for_al], al
+  and al, 00000001b
+  mov byte ptr[w_part], al
+  mov al, byte ptr[temp_for_al]
+ret
+ 
+      
+      
+      
+getMOD:
+  mov byte ptr[temp_for_al], al
+  and al, 11000000b
+  mov byte ptr[mod_part], al
+  
+  mov al, byte ptr[temp_for_al]
+ret
+  
+  
+  
+getREG:
+  mov byte ptr[temp_for_al], al
+  and al, 00111000b
+  mov byte ptr[reg_part], al
+  mov al, byte ptr[temp_for_al]
+ret
+          
+          
+          
+          
+getRM:
+  mov byte ptr[temp_for_al], al
+  and al, 00000111b
+  mov byte ptr[rm_part], al
+  mov al, byte ptr[temp_for_al]
+ret
+    
+    
+    
+getSreg:;Jam reikia paduoti baita, kuriame yra sreg (byte_for_sreg)
+ mov byte ptr[temp_for_al], al
+ mov al, byte ptr[byte_for_sreg]
+ and al, 00011000b
+ mov byte ptr[sreg_part], al
+ mov al, byte ptr[temp_for_al]
+ret
+    
+  
+    
+check_meybe_set_prefix:
+ mov byte ptr[temp_for_al], al
+ mov al, byte ptr[firstByte]
+ 
+ cmp al, 26h
+    je set_ES
+ cmp al, 2Eh
+    je set_CS
+ cmp al, 36h
+    je set_SS
+ cmp al, 3Eh
+    je set_DS
+    
+ mov byte ptr[prefix_nr], 0
+    
+ jmp end_of_check_meybe_set_prefix ;JEIGU NERA, TIESIOG JMP I PROCEDUROS PABAIGA
+ 
+ set_ES:
+    mov byte ptr[prefix_nr], 1
+    jmp end_of_check_meybe_set_prefix 
+    
+ set_CS:
+    mov byte ptr[prefix_nr], 2
+    jmp end_of_check_meybe_set_prefix
+    
+ set_SS:
+    mov byte ptr[prefix_nr], 3
+    jmp end_of_check_meybe_set_prefix
+    
+ set_DS:
+    mov byte ptr[prefix_nr], 4
+    jmp end_of_check_meybe_set_prefix      
+ 
+ 
+ end_of_check_meybe_set_prefix:
+    mov al, byte ptr[temp_for_al]
+ret                                                                                                                    
+
+;**********************************************************************************************************************
+;------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 exit:
     mov ah, 9
