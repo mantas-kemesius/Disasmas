@@ -1,5 +1,12 @@
 <h1>Asemblerio komandų operacijos kodų sąrašas</h1>
 </br></br>
+<h2>Skirstau pagal formatus:</h2>
+1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis</br>
+1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis</br> 
+1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis</br>
+
+</br></br>
+</br></br>
 <strong>Visi MOV variantai (6):</strong></br>
 1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis</br>
 1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis</br> 
