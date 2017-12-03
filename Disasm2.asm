@@ -19,8 +19,8 @@
     ;          db  0h,0ECh, 0CDh,21h, 12h
      ;         db 26h,74h, 5Ch, 5Fh  
               
-    Mas_kodas db 8Bh, 40h, 23h, 59h,13h
-              db  0h,0ECh, 0CDh,21h, 12h
+    Mas_kodas db 8Bh, 40h, 23h, 43h, 66h
+              db 42h,0ECh, 0CDh,21h, 12h
               db 26h,74h, 5Ch, 5Fh
 ;----------------DARBINIAI KINTAMIEJI  
 
@@ -39,7 +39,8 @@
     firstByte db ? ;pasidedam pirma komandos baita
     secondByte db ? ;pasidedam pirma komandos baita
     thirdByte db ? ;pasidedam pirma komandos baita
-
+    4Byte db ? ;pasidedam pirma komandos baita
+    
     format_nr db ? ;dabartines komandos formato numeris
 
 ;---------------SPAUSDINAMU KOMANDU VARDAI
@@ -181,7 +182,7 @@ RET
 
 gauk_formato_nr:
     
-    cmp byte ptr[firstByte], 40h
+    cmp byte ptr[firstByte], 40h ;INC IR POP, toks pats formatas (xxxx xreg)
         jb gal_antras
     cmp byte ptr[firstByte], 5Fh
         ja gal_antras
@@ -202,10 +203,6 @@ gauk_formato_nr:
             gal_trecias_interval:
                 cmp byte ptr[firstByte], 8Bh
                     jle taip_trecias
-    
-    
-    
-    
     
     
     gauk_formato_nr_next:
@@ -357,17 +354,30 @@ print_formatui3: ;formatui (mod reg r/m)
                     
                     
     format3_poslinkis:
-        call getFirstByte
         mov ah, 9
         mov dx, offset pliusas_
         int 21h
-        call print_baita_hexu
+        
+        cmp mod_part, 80h;Checkiname kokio ilgio baitas bus
+        je format3_poslinkis_2baitai
+            call getFirstByte
+            mov byte ptr [thirdByte], al
+            jmp format3_poslinkis_next
+            
+            format3_poslinkis_2baitai:
+                call getFirstByte
+                mov byte ptr [thirdByte], al
+                call getFirstByte
+                mov byte ptr [4Byte], al
+                call print_jaunesnyji_baita_hexu
+                mov al, byte ptr [thirdByte]
+                 
+       format3_poslinkis_next:                      
+        call print_vyresnyji_baita_hexu
         
     format3_lastCheck:
         mov ah, 9
         mov dx, offset sond_
-        int 21h
-        mov dx, offset k_
         int 21h
             
         cmp d_part, 0h
@@ -377,6 +387,9 @@ print_formatui3: ;formatui (mod reg r/m)
                                
                                                           
     format3_reg_pirmas_second:;DARBAS SU REG
+        mov ah, 9
+        mov dx, offset k_
+        int 21h
         cmp w_part, 0h
             je format3_reg_pirmas_second_byte
             
@@ -388,55 +401,10 @@ print_formatui3: ;formatui (mod reg r/m)
         format3_reg_pirmas_second_byte:
             mov al, byte ptr[secondByte]
             call print_reg_w0 
-            
-            
-                 
-          
+              
     format3_end:
         pop ax
 RET
-
-spausdink_pagal_mod:
-
-   cmp mod_part, 00h
-        je mod_00
-   cmp mod_part, 04h
-        je mod_01
-   cmp mod_part, 08h
-        je mod_10
-   cmp mod_part, 0C0h
-        je mod_11
-   
-   mod_00:
-     call print_rm_mod00
-     jmp spausdink_pagal_mod_end   
-   mod_01:
-     call print_rm_mod01
-     jmp spausdink_pagal_mod_end
-    
-   mod_10:
-     call print_rm_mod10
-     jmp spausdink_pagal_mod_end
-    
-   mod_11:
-     cmp w_part, 0h
-        je spausdink_pagal_mod11_w0
-     jmp spausdink_pagal_mod11_w1 
-     
-   
-   spausdink_pagal_mod11_w0:
-      call print_rm_w0_mod11
-      jmp spausdink_pagal_mod_end
-      
-   spausdink_pagal_mod11_w1:
-      call print_rm_w1_mod11
-      jmp spausdink_pagal_mod_end    
-   
-    
-spausdink_pagal_mod_end:
-RET
-
-
 
 
 ;NEATPAZINTAS------------- ATLIEKAMI SPEC VEIKSMAI BUTENT JAM ---------------------------------------
@@ -461,7 +429,7 @@ print_formatui0:
 RET
 
 ;------------------------------------------------------------------------------------------------------
-
+;******************************************************************************************************
 
 
 ;Spausdina komandos varda pagal pirma baita (bendru atveju pirma baita ir galbut antra, arba antro reg dali)
@@ -521,7 +489,96 @@ spausdink_varda:
         pop ax
 RET
 
+spausdink_pagal_mod:
+
+   cmp mod_part, 00h
+        je mod_00
+   cmp mod_part, 40h
+        je mod_01
+   cmp mod_part, 80h
+        je mod_10
+   cmp mod_part, 0C0h
+        je mod_11
+   
+   mod_00:
+     call print_rm_mod00
+     jmp spausdink_pagal_mod_end   
+   mod_01:
+     call print_rm_mod01
+     jmp spausdink_pagal_mod_end
+    
+   mod_10:
+     call print_rm_mod10
+     jmp spausdink_pagal_mod_end
+    
+   mod_11:
+     cmp w_part, 0h
+        je spausdink_pagal_mod11_w0
+     jmp spausdink_pagal_mod11_w1 
+     
+   
+   spausdink_pagal_mod11_w0:
+      call print_rm_w0_mod11
+      jmp spausdink_pagal_mod_end
+      
+   spausdink_pagal_mod11_w1:
+      call print_rm_w1_mod11
+      jmp spausdink_pagal_mod_end    
+   
+    
+spausdink_pagal_mod_end:
+RET
+
 ;------------------------------------------------------------------------------------------------------
+print_jaunesnyji_baita_hexu:
+   push ax
+   push bx
+   push cx
+   push dx
+        push ax
+            and al, 11110000b
+                mov cl, 4
+                shr al, cl ;stumiam al bitus i desine per 4 vietas (prireike CL)
+                            ;nes SHR antras operandas tik is aibes {1,CL}
+                call print_hex_skaitmuo
+        pop ax
+
+        push ax
+            and al, 00001111b
+            call print_hex_skaitmuo
+        pop ax
+
+   pop dx
+   pop cx
+   pop bx
+   pop ax
+RET  
+
+print_vyresnyji_baita_hexu:
+   push ax
+   push bx
+   push cx
+   push dx
+        push ax
+            and al, 11110000b
+                mov cl, 4
+                shr al, cl ;stumiam al bitus i desine per 4 vietas (prireike CL)
+                            ;nes SHR antras operandas tik is aibes {1,CL}
+                call print_hex_skaitmuo
+        pop ax
+
+        push ax
+            and al, 00001111b
+            call print_hex_skaitmuo
+        pop ax
+        mov ah, 2
+        mov dl, 'h'
+        int 21h
+   pop dx
+   pop cx
+   pop bx
+   pop ax
+RET
 
 print_baita_hexu:
    push ax
