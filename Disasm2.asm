@@ -196,9 +196,10 @@ gauk_formato_nr:;******************* ANTRAS *********************
 
     gal_antras:
         cmp byte ptr[firstByte], 0CDh ;ar antras formatas, jo pirmas baitas CD - (INT)
-        je taip_antras
-    
-    gal_trecias: ;kai (mod reg r/m) MOV
+        je taip_antras      
+        
+;---------------------------------------------- FORMATAS (xxxx xxdw mod reg r/m)   
+    gal_trecias: ;kai MOV
         cmp byte ptr[firstByte], 88h
             jge gal_trecias_interval
             jmp gal_trecias_interval_end
@@ -207,7 +208,7 @@ gauk_formato_nr:;******************* ANTRAS *********************
                     jle taip_trecias
             gal_trecias_interval_end:
             
-    gal_trecias2: ;kai (mod reg r/m) MOV
+    gal_trecias2: ;kai ADD
         cmp byte ptr[firstByte], 00h
             jge gal_trecias2_interval
             jmp gal_trecias2_interval_end
@@ -216,7 +217,7 @@ gauk_formato_nr:;******************* ANTRAS *********************
                     jle taip_trecias
             gal_trecias2_interval_end:
             
-    gal_trecias3: ;kai (mod reg r/m) MOV
+    gal_trecias3: ;kai SUB
         cmp byte ptr[firstByte], 28h
             jge gal_trecias3_interval
             jmp gal_trecias3_interval_end
@@ -225,7 +226,7 @@ gauk_formato_nr:;******************* ANTRAS *********************
                     jle taip_trecias
             gal_trecias3_interval_end:
                                     
-    gal_trecias4: ;kai (mod reg r/m) MOV
+    gal_trecias4: ;kai CMP
         cmp byte ptr[firstByte], 38h
             jge gal_trecias4_interval
             jmp gal_trecias4_interval_end
@@ -233,11 +234,12 @@ gauk_formato_nr:;******************* ANTRAS *********************
                 cmp byte ptr[firstByte], 3Bh
                     jle taip_trecias
             gal_trecias4_interval_end:    
+;-----------------------------------------------------------------
             
    ;--- VISIKITI CMP 3 formato.
     
                     
-    gal_ketvirtas: ;kai (mod xxx r/m)
+    gal_ketvirtas: ;kai (xxxx xxxw mod xxx r/m)
         cmp byte ptr[firstByte], 0C6h
             jge gal_ketvirtas_interval
             jmp gauk_formato_nr_next
