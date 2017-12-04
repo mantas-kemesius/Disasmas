@@ -12,14 +12,14 @@
 
 </br></br>
 <strong>Visi PUSH variantai (3);</strong></br>
-000sr 110 – PUSH segmento registras(+)</br>
+000sr 110 – PUSH segmento registras(+)*-DONE-*+++</br>
 0101 0reg – PUSH registras (žodinis)(+)*-DONE-*+++</br>
 1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis(+)*-DONE-*+++</br>
 06 - 1E</br>50 - 57 </br>FF </br>
 </br></br>
 <strong>Visi POP variantai (3);</strong></br>
 0101 1reg – POP registras (žodinis)(+)*-DONE-*</br>
-000sr 111 – POP segmento registras(+)</br>
+000sr 111 – POP segmento registras(+)*-DONE-*+++</br>
 1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis(+)*-DONE-*+++</br>
 58 - 5F</br>07 - 1F</br>8F</br>
 
