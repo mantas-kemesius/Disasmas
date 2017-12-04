@@ -12,32 +12,32 @@
 
 </br></br>
 <strong>Visi PUSH variantai (3);</strong></br>
-000sr 110 – PUSH segmento registras(+)</br>
-0101 0reg – PUSH registras (žodinis)(+)</br>
-1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis(+)</br>
+000sr 110 – PUSH segmento registras(+)*-DONE-*+++</br>
+0101 0reg – PUSH registras (žodinis)(+)*-DONE-*+++</br>
+1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis(+)*-DONE-*+++</br>
 06 - 1E</br>50 - 57 </br>FF </br>
 </br></br>
 <strong>Visi POP variantai (3);</strong></br>
 0101 1reg – POP registras (žodinis)(+)*-DONE-*</br>
-000sr 111 – POP segmento registras(+)</br>
-1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis(+)</br>
+000sr 111 – POP segmento registras(+)*-DONE-*+++</br>
+1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis(+)*-DONE-*+++</br>
 58 - 5F</br>07 - 1F</br>8F</br>
 
 </br></br>
 <strong>Visi ADD variantai (3);</strong></br>
 0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas(+)</br>
-0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis(+)*-DONE-*</br>
+0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis(+)*-DONE-*+++</br>
 1000 00sw mod 000 r/m [poslinkis] bojb [bovb] – ADD registras/atmintis += betarpiškas operandas **(veliau)(+)</br> 
 04 - 05</br>00 - 03</br>80 - 83</br>
 </br></br>
 <strong>Visi INC variantai (2);</strong></br>
 0100 0reg – INC registras (žodinis)(+)*-DONE-*</br>
-1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis(+)</br>
+1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis(+)*-DONE-*+++</br>
 40 - 47</br>FE - FF</br>
 </br></br>
 <strong>Visi DEC variantai (2);</strong></br>
-0100 1reg – DEC registras (žodinis)(+)</br>
-1111 111w mod 001 r/m [poslinkis] – DEC registras/atmintis(+)</br>
+0100 1reg – DEC registras (žodinis)(+)*-DONE-*+++</br>
+1111 111w mod 001 r/m [poslinkis] – DEC registras/atmintis(+)*-DONE-*+++</br>
 48 - 4F</br>FF - FE</br>
 </br></br>
 <strong>Visi SUB variantai (3);</strong></br>
@@ -53,11 +53,11 @@
 38 - 3B</br>3C - 3B</br>80 - 83</br>
 </br></br>
 <strong>Komanda MUL;</strong></br>
-1111 011w mod 100 r/m [poslinkis] – MUL registras/atmintis(+)</br>
+1111 011w mod 100 r/m [poslinkis] – MUL registras/atmintis(+)*-DONE-*</br>
 F6 - F7</br>
 </br></br>
 <strong>Komanda DIV;</strong></br>
-1111 011w mod 110 r/m [poslinkis] – DIV registras/atmintis(+)</br>
+1111 011w mod 110 r/m [poslinkis] – DIV registras/atmintis(+)*-DONE-*</br>
 F6 - F7</br>
 </br></br>
 <strong>Visi CALL variantai (4);</strong></br>
