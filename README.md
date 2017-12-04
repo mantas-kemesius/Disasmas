@@ -53,11 +53,11 @@
 38 - 3B</br>3C - 3B</br>80 - 83</br>
 </br></br>
 <strong>Komanda MUL;</strong></br>
-1111 011w mod 100 r/m [poslinkis] – MUL registras/atmintis(+)</br>
+1111 011w mod 100 r/m [poslinkis] – MUL registras/atmintis(+)*-DONE-*</br>
 F6 - F7</br>
 </br></br>
 <strong>Komanda DIV;</strong></br>
-1111 011w mod 110 r/m [poslinkis] – DIV registras/atmintis(+)</br>
+1111 011w mod 110 r/m [poslinkis] – DIV registras/atmintis(+)*-DONE-*</br>
 F6 - F7</br>
 </br></br>
 <strong>Visi CALL variantai (4);</strong></br>
