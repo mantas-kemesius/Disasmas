@@ -14,7 +14,7 @@
 <strong>Visi PUSH variantai (3);</strong></br>
 000sr 110 – PUSH segmento registras(+)</br>
 0101 0reg – PUSH registras (žodinis)(+)*-DONE-*+++</br>
-1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis(+)</br>
+1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis(+)*-DONE-*+++</br>
 06 - 1E</br>50 - 57 </br>FF </br>
 </br></br>
 <strong>Visi POP variantai (3);</strong></br>
@@ -32,12 +32,12 @@
 </br></br>
 <strong>Visi INC variantai (2);</strong></br>
 0100 0reg – INC registras (žodinis)(+)*-DONE-*</br>
-1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis(+)</br>
+1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis(+)*-DONE-*+++</br>
 40 - 47</br>FE - FF</br>
 </br></br>
 <strong>Visi DEC variantai (2);</strong></br>
 0100 1reg – DEC registras (žodinis)(+)*-DONE-*+++</br>
-1111 111w mod 001 r/m [poslinkis] – DEC registras/atmintis(+)</br>
+1111 111w mod 001 r/m [poslinkis] – DEC registras/atmintis(+)*-DONE-*+++</br>
 48 - 4F</br>FF - FE</br>
 </br></br>
 <strong>Visi SUB variantai (3);</strong></br>
