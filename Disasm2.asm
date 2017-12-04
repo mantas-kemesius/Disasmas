@@ -19,7 +19,7 @@
     ;          db  0h,0ECh, 0CDh,21h, 12h
      ;         db 26h,74h, 5Ch, 5Fh  
               
-    Mas_kodas db 2Bh, 40h, 23h, 01h, 0C6h
+    Mas_kodas db 07h, 17h, 0FFh, 0C8h, 0C6h
               db 00h,23h, 24h,3Bh, 12h
               db 26h,74h, 5Ch, 5Fh
 ;----------------DARBINIAI KINTAMIEJI  
@@ -39,7 +39,7 @@
     firstByte db ? ;pasidedam pirma komandos baita
     secondByte db ? ;pasidedam pirma komandos baita
     thirdByte db ? ;pasidedam pirma komandos baita
-    4Byte db ? ;pasidedam pirma komandos baita
+    Byte4 db ? ;pasidedam pirma komandos baita
     
     format_nr db ? ;dabartines komandos formato numeris
 
@@ -90,7 +90,7 @@
     
 
     t_ES db 'es$'
-    t_CS db 'ds$'
+    t_CS db 'cs$'
     t_SS db 'ss$'
     t_DS db 'ds$'
 
@@ -168,21 +168,53 @@ getInfo:
     call gauk_formato_nr    ;*********************  PIRMAS ********************
 
     cmp byte ptr[format_nr], 1 ;jei formato numeris 1   ;*********************  TRECIAS ********************
-        je domisi_pirmu
+        je domisi_pirmu_temp
     cmp byte ptr[format_nr], 2 ;jei formato numeris 2
-        je domisi_antru
-    cmp byte ptr[format_nr], 3 ;jei formatas (xxxx xxdw mod reg r/m)
-        je domisi_treciu
-    cmp byte ptr[format_nr], 4 ;jei formatas (xxxx xxxw mod xxxx r/m)
-        je domisi_treciu
+        je domisi_antru_temp
+    cmp byte ptr[format_nr], 3 ;jei formatas (xxxx xxdw mod reg r/m [poslinkis])
+        je domisi_treciu_temp
+    cmp byte ptr[format_nr], 4 ;jei formatas (xxxx xxxw mod xxxx r/m [poslinkis] bojb [bovb]) cia su SW
+        je domisi_treciu_temp
+    cmp byte ptr[format_nr], 5 ;jei formatas (xxxx xxxw mod xxxx r/m [poslinkis] )
+        je domisi_treciu_temp
+    cmp byte ptr[format_nr], 6 ;jei formatas (xxxx xxxw mod xxxx r/m [poslinkis] )
+        je domisi_pirmu_temp         
     jmp domisi_nuliniu ;kai netiko ne vienas atvejis
-
+	
+	
+	domisi_pirmu_temp:
+		jmp domisi_pirmu
+	domisi_antru_temp:
+		jmp domisi_antru
+    domisi_treciu_temp:
+		jmp domisi_treciu
+	
+	domisi_nuliniu:
 RET
 
 ;------------------------------------------------------------------------------------------------------
 ;Mazdaug atrenkame i kuria puse ziureti
 
 gauk_formato_nr:;******************* ANTRAS *********************
+;------------------------------------------------------------------------- Formatas (xxxx xreg)    
+    
+    gal_pirmas3: ;kai PUSH 
+       cmp byte ptr[firstByte], 50h
+           jge gal_pirmas3_interval
+           jmp gal_pirmas3_interval_end
+           gal_pirmas3_interval:
+               cmp byte ptr[firstByte], 57h
+                   jle taip_pirmas_temp
+    gal_pirmas3_interval_end:
+    
+    gal_pirmas2: ;kai DEC 
+       cmp byte ptr[firstByte], 48h
+           jge gal_pirmas2_interval
+           jmp gal_pirmas2_interval_end
+           gal_pirmas2_interval:
+               cmp byte ptr[firstByte], 4Fh
+                   jle taip_pirmas_temp
+    gal_pirmas2_interval_end:
     
     cmp byte ptr[firstByte], 40h ;INC IR POP, toks pats formatas (xxxx xreg)
         jb gal_antras
@@ -192,11 +224,17 @@ gauk_formato_nr:;******************* ANTRAS *********************
     ;patekom i intervala 40h-5Fh
     ;reiskia pirmas formatas
     mov byte ptr[format_nr], 1
-    RET 
-
+    RET
+	taip_pirmas_temp:
+		jmp taip_pirmas
+;----------------------------------------------------------------------------------------
     gal_antras:
         cmp byte ptr[firstByte], 0CDh ;ar antras formatas, jo pirmas baitas CD - (INT)
-        je taip_antras      
+        je taip_antras_temp
+		jmp gal_trecias
+		
+		taip_antras_temp:
+		jmp taip_antras
         
 ;---------------------------------------------- FORMATAS (xxxx xxdw mod reg r/m)   
     gal_trecias: ;kai MOV
@@ -205,17 +243,23 @@ gauk_formato_nr:;******************* ANTRAS *********************
             jmp gal_trecias_interval_end
             gal_trecias_interval:
                 cmp byte ptr[firstByte], 8Bh
-                    jle taip_trecias
-            gal_trecias_interval_end:
-            
+                    jle taip_trecias_temp
+					jmp gal_trecias_interval_end
+					taip_trecias_temp:
+						jmp taip_trecias
+    gal_trecias_interval_end:     
     gal_trecias2: ;kai ADD
         cmp byte ptr[firstByte], 00h
             jge gal_trecias2_interval
             jmp gal_trecias2_interval_end
             gal_trecias2_interval:
                 cmp byte ptr[firstByte], 03h
-                    jle taip_trecias
-            gal_trecias2_interval_end:
+                    jle taip_trecias2_temp
+					jmp gal_trecias2_interval_end
+					
+					taip_trecias2_temp:
+						jmp taip_trecias
+    gal_trecias2_interval_end:
             
     gal_trecias3: ;kai SUB
         cmp byte ptr[firstByte], 28h
@@ -223,30 +267,66 @@ gauk_formato_nr:;******************* ANTRAS *********************
             jmp gal_trecias3_interval_end
             gal_trecias3_interval:
                 cmp byte ptr[firstByte], 2Bh
-                    jle taip_trecias
-            gal_trecias3_interval_end:
-                                    
+                    jle taip_trecias3_temp
+					jmp gal_trecias3_interval_end
+					
+					taip_trecias3_temp:
+						jmp taip_trecias
+						
+    gal_trecias3_interval_end:                 
     gal_trecias4: ;kai CMP
         cmp byte ptr[firstByte], 38h
             jge gal_trecias4_interval
             jmp gal_trecias4_interval_end
             gal_trecias4_interval:
                 cmp byte ptr[firstByte], 3Bh
-                    jle taip_trecias
-            gal_trecias4_interval_end:    
+                    jle taip_trecias4_temp
+					jmp gal_trecias4_interval_end
+					
+					taip_trecias4_temp:
+						jmp taip_trecias
+    gal_trecias4_interval_end:    
 ;-----------------------------------------------------------------
             
    ;--- VISIKITI CMP 3 formato.
     
                     
-    gal_ketvirtas: ;kai (xxxx xxxw mod xxx r/m)
+    gal_ketvirtas: ;kai (xxxx xxxw mod xxx r/m [poslinkis] bojb [bovb])
         cmp byte ptr[firstByte], 0C6h
             jge gal_ketvirtas_interval
-            jmp gauk_formato_nr_next
+            jmp gal_penktas1
             gal_ketvirtas_interval:
                 cmp byte ptr[firstByte], 0C7h
-                    jle taip_ketvirtas 
+                    jle taip_ketvirtas    
+                                  
+    gal_penktas1: ;kai (xxxx xxxw mod xxx r/m [poslinkis])
+        cmp byte ptr[firstByte], 8Fh        ;POP
+            je taip_penktas
+    
+    gal_penktas2: ;kai (xxxx xxxw mod xxx r/m [poslinkis])
+        cmp byte ptr[firstByte], 0FEh        ;PUSH, INC arba DEC atskiraime pagal REG
+            jge gal_penktas2_interval
+            jmp gal_penktas
+            gal_penktas2_interval:
+                cmp byte ptr[firstByte], 0FFh
+                    jle taip_penktas        
+                            
+    gal_penktas: ;kai (xxxx xxxw mod xxx r/m [poslinkis])
+        cmp byte ptr[firstByte], 0F6h        ;GALI BUTI MUL GALI IR DIV
+            jge gal_penktas_interval
+            jmp gal_sestas
+            gal_penktas_interval:
+                cmp byte ptr[firstByte], 0F7h
+                    jle taip_penktas   
                     
+    gal_sestas: ;kai (xxxs rxxx)
+        cmp byte ptr[firstByte], 06h        ;GALI BUTI PUSH ARBA POP
+            jge gal_sestas_interval
+            jmp gauk_formato_nr_next
+            gal_sestas_interval:
+                cmp byte ptr[firstByte], 1Fh
+                    jle taip_sestas                
+                                                      
     
     gauk_formato_nr_next:
     
@@ -263,18 +343,27 @@ gauk_formato_nr:;******************* ANTRAS *********************
     taip_antras:
         mov byte ptr[format_nr], 2
         RET
-
+    taip_pirmas:
+        mov byte ptr[format_nr], 1
+        RET    
+    taip_penktas:
+        mov byte ptr[format_nr], 5
+        RET
+    taip_sestas:
+        mov byte ptr[format_nr], 6
+        RET    
     neatpazintas:
         mov byte ptr[format_nr], 0
         RET            
 
 ;------------------------------------------------------------------------------------------------------
 
-;(xxxx xreg)
+;(xxxx xreg) arba (xxxs rxxx) - sreg
 domisi_pirmu:
 
     push ax
         mov al, byte ptr[firstByte]
+        call getSreg
         and al, 111b
         mov byte ptr[rm_part], al
     pop ax 
@@ -304,9 +393,6 @@ domisi_treciu:
    
 RET
 
-domisi_nuliniu:  
-RET
-
 ;------------------------------------------------------------------------------------------------------
 
 
@@ -325,6 +411,10 @@ print_kodo_eilute:
         je pr_kod_kviesk3
     cmp byte ptr[format_nr], 4
         je pr_kod_kviesk4
+    cmp byte ptr[format_nr], 5
+        je pr_kod_kviesk5
+    cmp byte ptr[format_nr], 6
+        je pr_kod_kviesk6         
         
         
     jmp pr_kod_kviesk0
@@ -341,7 +431,13 @@ print_kodo_eilute:
         RET
     pr_kod_kviesk4:
         call print_formatui4
-        RET    
+        RET
+    pr_kod_kviesk5:
+        call print_formatui5
+        RET
+    pr_kod_kviesk6:
+        call print_formatui6
+        RET            
             
     pr_kod_kviesk0:
         call print_formatui0
@@ -352,7 +448,7 @@ print_kodo_eilute:
     
     
     
-print_formatui1:
+print_formatui1: ;(xxxx xreg)
     push ax
     call spausdink_varda
     mov al, byte ptr[rm_part]
@@ -368,7 +464,7 @@ print_formatui2:
     pop ax
 RET
 
-print_formatui3: ;formatui (mod reg r/m)
+print_formatui3: ;formatui (xxxx xxdw mod reg r/m [poslinkis])
     push ax
     call spausdink_varda
     cmp d_part, 0h
@@ -419,7 +515,7 @@ print_formatui3: ;formatui (mod reg r/m)
                 call getFirstByte
                 mov byte ptr [thirdByte], al
                 call getFirstByte
-                mov byte ptr [4Byte], al
+                mov byte ptr [Byte4], al
                 call print_jaunesnyji_baita_hexu
                 mov al, byte ptr [thirdByte]
                  
@@ -461,7 +557,7 @@ RET
 
 
 
-print_formatui4: ;formatui (mod xxx r/m)
+print_formatui4: ;formatui (xxxx xxxw mod xxx r/m [poslinkis] bojb [bojbv])
     push ax
     call spausdink_varda
     
@@ -491,7 +587,7 @@ print_formatui4: ;formatui (mod xxx r/m)
                 call getFirstByte
                 mov byte ptr [thirdByte], al
                 call getFirstByte
-                mov byte ptr [4Byte], al
+                mov byte ptr [Byte4], al
                 call print_jaunesnyji_baita_hexu
                 mov al, byte ptr [thirdByte]
                  
@@ -520,7 +616,57 @@ print_formatui4: ;formatui (mod xxx r/m)
     pop ax
 RET
 
+print_formatui5: ;formatui (xxxx xxxw mod xxx r/m [poslinkis] bojb [bojbv])
+    push ax
+    call spausdink_varda
+    
+    mov ah, 9
+    mov dx, offset sonk_
+    int 21h
+    mov al, byte ptr[secondByte]
+    call spausdink_pagal_mod  
+    cmp mod_part, 0C0h
+        je format5_end
+    cmp mod_part, 0h
+        je format5_end                   
+                    
+    format5_poslinkis:
+        mov ah, 9
+        mov dx, offset pliusas_
+        int 21h
+        
+        cmp mod_part, 80h ;Checkiname kokio ilgio baitas bus (2)
+        je format5_poslinkis_2baitai
+            call getFirstByte
+            mov byte ptr [thirdByte], al
+            jmp format5_poslinkis_next
+            
+            format5_poslinkis_2baitai:
+                call getFirstByte
+                mov byte ptr [thirdByte], al
+                call getFirstByte
+                mov byte ptr [Byte4], al
+                call print_jaunesnyji_baita_hexu
+                mov al, byte ptr [thirdByte]
+                 
+       format5_poslinkis_next:                      
+        call print_vyresnyji_baita_hexu
+        
+            
+    format5_end:
+    mov ah, 9
+    mov dx, offset sond_
+    int 21h
+    pop ax
+RET
 
+print_formatui6: ;formatui (xxxs rxxw)
+    
+    push ax
+    call spausdink_varda_sreg
+    pop ax
+    
+RET
 
 
 
@@ -549,7 +695,59 @@ RET
 ;******************************************************************************************************
 
 ;Spausdina komandos varda pagal pirma baita (bendru atveju pirma baita ir galbut antra, arba antro reg dali)
-
+spausdink_varda_sreg:
+    push ax
+    push bx
+    push cx
+    push dx 
+    
+    cmp rm_part, 06h
+        je spausdink_varda_push
+        mov dx, offset c_POP
+        mov ah, 9
+        int 21h
+        jmp sreg_next  
+        
+    spausdink_varda_push:
+        mov dx, offset c_PUSH
+        mov ah, 9
+        int 21h    
+    
+    
+    sreg_next:
+    cmp sreg_part, 0h
+        je sreg_bus_es
+    cmp sreg_part, 80h
+        je sreg_bus_cs
+    cmp sreg_part, 10h
+        je sreg_bus_ss  
+        
+    jmp sreg_bus_ds
+    
+    sreg_bus_es:
+      mov bx, offset t_ES
+      jmp spausdink_sreg 
+    sreg_bus_cs:
+      mov bx, offset t_CS
+      jmp spausdink_sreg
+    sreg_bus_ss:
+      mov bx, offset t_SS
+      jmp spausdink_sreg
+    sreg_bus_ds:
+      mov bx, offset t_DS
+      jmp spausdink_sreg
+      
+    spausdink_sreg:
+        mov ah,9
+        mov dx, bx
+        int 21h      
+       
+    return_from_sreg_spausd:
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+RET    
 spausdink_varda:
     push ax
     push bx
@@ -559,7 +757,30 @@ spausdink_varda:
     ;veliau formatui (mod xxxx r/m)
     ;gauk_komanda_pagal_reg:
         ;cmp byte ptr[reg_part], [kazkas]
-        ;je [spausdink_ta_komanda] ir t.t.                 
+        ;je [spausdink_ta_komanda] ir t.t.
+        
+        
+    spausdink_varda_nr_next4:
+    cmp byte ptr[firstByte], 48h ; KOMANDOS DEC
+        jge spausdink_varda_interval4
+           jmp spausdink_varda_nr_next3
+           spausdink_varda_interval4:
+                cmp byte ptr[firstByte], 4Fh
+                    jle komanda_dec_temp
+				    jmp spausdink_varda_nr_next3
+					komanda_dec_temp:
+						jmp komanda_dec
+        
+    spausdink_varda_nr_next3:
+    cmp byte ptr[firstByte], 50h ; KOMANDOS PUSH
+        jge spausdink_varda_interval3
+           jmp spausdink_varda_nr_next2
+           spausdink_varda_interval3:
+                cmp byte ptr[firstByte], 57h
+                    jle komanda_push_temp
+				    jmp spausdink_varda_nr_next2
+					komanda_push_temp:
+						jmp komanda_push                
     
     spausdink_varda_nr_next2:
     cmp byte ptr[firstByte], 0C6h ; KOMANDOS MOV
@@ -567,8 +788,11 @@ spausdink_varda:
            jmp spausdink_varda_nr_next1
            spausdink_varda_interval2:
                 cmp byte ptr[firstByte], 0C7h
-                    jle komanda_mov
-                                  
+                    jle komanda_mov1_temp
+					jmp spausdink_varda_nr_next1
+					
+					komanda_mov1_temp:
+						jmp komanda_mov
     
      spausdink_varda_nr_next1:                                                         
      cmp byte ptr[firstByte], 88h
@@ -597,10 +821,31 @@ spausdink_varda:
     spausdink_varda_nr_next02:                
     cmp byte ptr[firstByte], 38h
         jge spausdink_varda_interval02
-           jmp spausdink_varda_nr_next
+           jmp spausdink_varda_nr_next03
            spausdink_varda_interval02:
                 cmp byte ptr[firstByte], 3Bh
-                    jle komanda_cmp                                                                                                
+                    jle komanda_cmp
+                    
+    spausdink_varda_nr_next03:                
+    cmp byte ptr[firstByte], 0F6h
+        jge spausdink_varda_interval03
+           jmp spausdink_varda_nr_next04
+           spausdink_varda_interval03:
+                cmp byte ptr[firstByte], 0F7h
+                    jle komanda_MUL_DIV 
+                    
+   spausdink_varda_nr_next04:
+        cmp byte ptr[firstByte], 8Fh
+              je komanda_pop
+              
+    spausdink_varda_nr_next05:                
+    cmp byte ptr[firstByte], 0FEh
+        jge spausdink_varda_interval05
+           jmp spausdink_varda_nr_next
+           spausdink_varda_interval05:
+                cmp byte ptr[firstByte], 0FFh
+                    jle komanda_PUSH_INC_DEC                                                                                                                                           
+;-------------------------------------------------------------------------                                   
                                                               
     spausdink_varda_nr_next:                                                          
     ;spejam, kad cia INC (pirmas baitas is intervalo 40-47h)  
@@ -609,11 +854,17 @@ spausdink_varda:
     cmp byte ptr[firstByte], 47h
     ja gal_komanda_pop
     
+    komanda_inc: 
+        mov bx, offset c_INC
+        jmp vardo_spausdinimas 
     
-    mov bx, offset c_INC
-    jmp vardo_spausdinimas 
-    
-    
+    komanda_dec:
+        mov bx, offset c_DEC
+        jmp vardo_spausdinimas
+    komanda_push:
+        mov bx, offset c_PUSH  
+        jmp vardo_spausdinimas
+        
     komanda_mov:
         mov bx, offset c_MOV  
         jmp vardo_spausdinimas
@@ -627,8 +878,27 @@ spausdink_varda:
         jmp vardo_spausdinimas
     komanda_cmp:
         mov bx, offset c_CMP  
-        jmp vardo_spausdinimas        
-    
+        jmp vardo_spausdinimas
+    komanda_pop:
+        mov bx, offset c_POP
+        jmp vardo_spausdinimas    
+    komanda_PUSH_INC_DEC:
+        cmp reg_part, 30h
+            je komanda_push    
+        cmp reg_part, 00h
+            je komanda_inc
+        jmp komanda_dec       
+    komanda_MUL_DIV:
+        cmp reg_part, 10h
+            je komanda_MUL
+            jmp komanda_DIV
+            komanda_MUL:
+                mov bx, offset c_MUL  
+                jmp vardo_spausdinimas
+            komanda_DIV:
+                mov bx, offset c_DIV
+                jmp vardo_spausdinimas    
+                   
     gal_komanda_pop:
         cmp byte ptr[firstByte], 58h
         jb gal_komanda_int
@@ -1487,7 +1757,6 @@ ret
     
 getSreg:;Jam reikia paduoti baita, kuriame yra sreg (byte_for_sreg)
  mov byte ptr[temp_for_al], al
- mov al, byte ptr[byte_for_sreg]
  and al, 00011000b
  mov byte ptr[sreg_part], al
  mov al, byte ptr[temp_for_al]
