@@ -3,7 +3,7 @@
 </br></br>
 <strong>Visi MOV variantai (6):</strong></br>
 1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis (+)*-DONE-*</br>
-1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis(+)</br> 
+1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis(+)*-DONE-*</br> 
 1010 000w ajb avb – MOV akumuliatorius  atmintis(+)</br>
 1010 001w ajb avb – MOV atmintis  akumuliatorius(+)</br>
 1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas(+)</br>
