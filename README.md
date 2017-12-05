@@ -8,7 +8,7 @@
 1010 001w ajb avb – MOV atmintis  akumuliatorius(+)</br>
 1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas(+)</br>
 1100 011w mod 000 r/m [poslinkis] bojb [bovb] – MOV registras/atmintis  betarpiškas operandas(+)*-DONE-*</br>
-88 - 8B</br>8C - 8E </br>A0 - A1 </br>C2 - C3 </br>B0 - BF </br>C6 - C7</br>
+88 - 8B</br>8C - 8E </br>A0 - A1 </br>A2 - A3 </br>B0 - BF </br>C6 - C7</br>
 
 </br></br>
 <strong>Visi PUSH variantai (3);</strong></br>
