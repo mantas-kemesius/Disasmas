@@ -27,7 +27,7 @@
 <strong>Visi ADD variantai (3);</strong></br>
 0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas(+)*-DONE-*+++</br>
 0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis(+)*-DONE-*+++</br>
-1000 00sw mod 000 r/m [poslinkis] bojb [bovb] – ADD registras/atmintis += betarpiškas operandas **(veliau)(+)</br> 
+1000 00sw mod 000 r/m [poslinkis] bojb [bovb] – ADD registras/atmintis += betarpiškas operandas **(veliau)(+)*-DONE-*</br> 
 04 - 05</br>00 - 03</br>80 - 83</br>
 </br></br>
 <strong>Visi INC variantai (2);</strong></br>
@@ -42,14 +42,14 @@
 </br></br>
 <strong>Visi SUB variantai (3);</strong></br>
 0010 110w bojb [bovb] – SUB akumuliatorius -= betarpiškas operandas(+)*-DONE-*+++</br>
-1000 00sw mod 101 r/m [poslinkis] bojb [bovb] – SUB registras/atmintis -= betarpiškas operandas **(veliau)(+)</br> 
+1000 00sw mod 101 r/m [poslinkis] bojb [bovb] – SUB registras/atmintis -= betarpiškas operandas **(veliau)(+)*-DONE-*</br> 
 0010 10dw mod reg r/m [poslinkis] – SUB registras -= registras/atmintis(+)*-DONE-*</br>
 2C - 2D</br>80 - 83</br>28 - 2B</br>
 </br></br>
 <strong>Visi CMP variantai (3);</strong></br>
 0011 10dw mod reg r/m [poslinkis] – CMP registras ~ registras/atmintis(+)*-DONE-*</br>
 0011 110w bojb [bovb] – CMP akumuliatorius ~ betarpiškas operandas(+)*-DONE-*+++</br>
-1000 00sw mod 111 r/m [poslinkis] bojb [bovb] – CMP registras/atmintis ~ betarpiškas operandas **(veliau)(+)</br> 
+1000 00sw mod 111 r/m [poslinkis] bojb [bovb] – CMP registras/atmintis ~ betarpiškas operandas **(veliau)(+)*-DONE-*</br> 
 38 - 3B</br>3C - 3B</br>80 - 83</br>
 </br></br>
 <strong>Komanda MUL;</strong></br>
