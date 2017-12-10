@@ -19,7 +19,7 @@ yraTaskas dw 0
 a dw 0
 sek dw 0
 skaicius dw 0
-counter dw 0
+poslinkis dw 100h
 bituKiekis dw 0
 loopCounter dw 0
 
@@ -45,13 +45,11 @@ neveikia    db "Failas nebuvo atidarytas$"
 
 
 ;---------------MASININIS KODAS
-   ; Mas_kodas db 41h, 42h, 43h, 59h,13h
-    ;          db  0h,0ECh, 0CDh,21h, 12h
-     ;         db 26h,74h, 5Ch, 5Fh  
               
-    Mas_kodas db 0B8h, 80h, 0FFh, 0C8h, 0C6h
-              db 00h,23h, 24h,3Bh, 12h
+    Mas_kodas db 83h, 0B8h, 01h, 0C8h, 79h
+              db 80h,23h, 24h,3Bh, 12h
               db 26h,74h, 5Ch, 5Fh
+			  
 ;----------------DARBINIAI KINTAMIEJI  
 
     reg_part db ?
@@ -72,78 +70,6 @@ neveikia    db "Failas nebuvo atidarytas$"
     Byte4 db ? ;pasidedam pirma komandos baita
     
     format_nr db ? ;dabartines komandos formato numeris
-
-;---------------SPAUSDINAMU KOMANDU VARDAI
-    c_INC db 'INC $'
-    c_POP db 'POP $'
-    c_INT db 'INT $'
-    c_MOV db 'MOV $'
-    c_PUSH db 'PUSH $'
-    c_ADD db 'ADD $'
-    c_DEC db 'DEC $'
-    c_SUB db 'SUB $'
-    c_CMP db 'CMP $'
-    c_MUL db 'MUL $'
-    c_DIV db 'DIV $'
-    c_CALL db 'CALL $'
-    c_RET db 'RET $'
-    
-    c_JMP db 'JMP $'
-    c_JO db 'JO $'
-    c_JNO db 'JNO $'
-    c_JNAE db 'JNAE $'
-    c_JAE db 'JAE $'
-    c_JE db 'JE $'
-    c_JNE db 'JNE $'
-    c_JBE db 'JBE $'
-    c_JA db 'JA $'
-    c_JS db 'JS $'
-    c_JNS db 'JNS $'
-    c_JP db 'JP $'
-    c_JNP db 'JNP $'
-    c_JL db 'JL $'
-    c_JGE db 'JGE $'
-    c_JLE db 'JLE $'
-    c_JG db 'JG $' 
-    
-    c_LOOP db 'LOOP $'
-
-;---------------SPAUSDINAMU REGISTRU VARDAI
-    ea_rm000 db 'bx+si$'
-    ea_rm001 db 'bx+di$'
-    ea_rm010 db 'bp+si$'
-    ea_rm011 db 'bp+di$'
-    ea_rm100 db 'si$'
-    ea_rm101 db 'di$'
-    ea_rm110 db 'bp$';kai mod=00 ir r/m = 110, tai tiesioginis
-    ea_rm111 db 'bx$'
-    
-
-    t_ES db 'es$'
-    t_CS db 'cs$'
-    t_SS db 'ss$'
-    t_DS db 'ds$'
-
-    r_AX db 'ax$'
-    r_AL db 'al$'
-    r_AH db 'ah$'
-    
-    r_CX db 'cx$'
-    r_CL db 'cl$'
-    r_CH db 'ch$'
-    
-    r_DX db 'dx$'
-    r_DL db 'dl$'
-    r_DH db 'dh$'
-    
-    r_BX db 'bx$'
-    r_BL db 'bl$'
-    r_BH db 'bh$'
-    
-    r_SP db 'sp$'
-    r_BP db 'bp$'
-    r_SI db 'si$'
-    r_DI db 'di$'
 
 ;***************************************************************************************************************************************************************
 
@@ -297,66 +223,46 @@ MOV dx, offset duom
 ;Darbas su nuskaityta informacija
 ;*****************************************************
 	xor bx,bx
-	MOV	cx, ax
-	mov cx, 15h
+	MOV	cx, 14h
 	;MOV	si, offset skBuf
 	mov si, offset Mas_kodas
 	MOV	di, offset raBuf
 	
 
 MainLoop:
+	cmp loopCounter, cx
+	jae temp_to_exit
+	mov dx, poslinkis
+    push dx
+    mov dl, dh
+    call idekSkaiciu
+    pop dx
+    mov dh, 0h
+    call idekSkaiciu
+    call spausdink_dvi;dvitaski
+	call trysTarpai
     call getFirstByte
-	
+
 	MOV	dl, al
-	push dx
-	and dl, 11110000b
-	push cx
-	mov cl, 4
-	shr dl, cl
-	pop cx
-	cmp dl, 9h
-	jge next__pradzia
-	add dl, 30h
-	jmp next2__pradzia
-	next__pradzia:
-	    add dl, 55
-	next2__pradzia:    
-	MOV	[di], dl
-	INC	di
-	inc bp
-	pop dx
-	push dx
-	and dl, 00001111b
-	cmp dl, 9h
-	jg next3__pradzia
-	add dl, 30h
-	jmp next4__pradzia
-	next3__pradzia:
-	    add dl, 55
-	next4__pradzia:  
-	MOV	[di], dl
-	INC	di
-	inc bp
-	MOV	[di], ' '
-	INC	di
-	inc bp
+	call idekSkaiciu
 	
     mov byte ptr[firstByte], al
 
     call getInfo
     call print_kodo_eilute
 	
-    mov ah, 9
-    mov dx, offset enteris
-    int 21h  
-        
+	call spausdink_enter   
 Loop MainLoop
+
+temp_to_exit:
+jmp exit
 
 	;------------------------------------------------------------------------------------------------------
     
 getFirstByte:
     mov al,[si]
     inc si
+	inc poslinkis
     inc loopCounter
     
     cmp loopCounter, cx
@@ -398,7 +304,7 @@ getInfo:
 	cmp byte ptr[format_nr], 9 ;jei formatas (xxxx wreg bojb bovb )
 		je domisi_pirmu_temp
 	cmp byte ptr[format_nr], 10 ;jei formatas (xxxx xxxw bojb [bovb] )
-		je domisi_treciu_temp
+		je domisi_nuliniu
     cmp byte ptr[format_nr], 11 ;jei formatas (xxxx xxsw mod xxx r/m [poslinkis] bovb [bojb] )
 		je domisi_treciu_temp		
        		
@@ -531,9 +437,6 @@ gauk_formato_nr:;******************* ANTRAS *********************
             je taip_penktas_temp
 			jmp gal_penktas2
 			taip_penktas_temp:
-				jmp taip_penktas_temp0
-				jmp gal_penktas2
-				taip_penktas_temp0:
 					jmp taip_penktas
     gal_penktas2: ;kai (xxxx xxxw mod xxx r/m [poslinkis])
         cmp byte ptr[firstByte], 0FEh        ;PUSH, INC arba DEC atskiraime pagal REG
@@ -701,6 +604,10 @@ domisi_antru:
 
    push ax
         call getFirstByte ;gaunam i AL antro baito reiksme
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
         mov byte ptr[bojb_baitas], al ;pasidedam i pacio disasmo duom segmenta bet.op. baito reiksme
    pop ax
    
@@ -711,6 +618,12 @@ domisi_treciu:
 
    push ax
         call getFirstByte
+		
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
+		
         mov byte ptr[secondByte], al
         call getMOD
 		call getSreg
@@ -803,6 +716,7 @@ print_kodo_eilute:
     
 print_formatui1: ;(xxxx xreg)
     push ax
+	call trysTarpai
     call spausdink_varda
     mov al, byte ptr[rm_part]
     call print_rm_w1_mod11
@@ -811,6 +725,7 @@ RET
 
 print_formatui2:
     push ax
+	call trysTarpai
     call spausdink_varda
     mov al, byte ptr[bojb_baitas]
     call print_baita_hexu
@@ -818,107 +733,50 @@ print_formatui2:
 RET
 
 print_formatui3: ;formatui (xxxx xxdw mod reg r/m [poslinkis])
-    push ax
-    call spausdink_varda
-    cmp d_part, 0h
-        je format3_reg_antras
-        
-    format3_reg_pirmas:;DARBAS SU REG
-        cmp w_part, 0h
-            je format3_reg_pirmas_byte
-            
-        format3_reg_pirmas_word:
-            mov al, byte ptr[secondByte]
-            call print_reg_w1
-            mov ah, 9
-            mov dx, offset k_
-            int 21h
-            jmp format3_reg_antras
-        format3_reg_pirmas_byte:
-            mov al, byte ptr[secondByte]
-            call print_reg_w0
-            mov ah, 9
-            mov dx, offset k_
-            int 21h
-             
-    format3_reg_antras:;DARBAS SU R/M
-        mov ah, 9
-        mov dx, offset sonk_
-        int 21h
-        mov al, byte ptr[secondByte]
-        call spausdink_pagal_mod
-        cmp mod_part, 0C0h
-            je format3_lastCheck
-        cmp mod_part, 0h
-            je format3_lastCheck   
-                    
-                    
-    format3_poslinkis:
-        mov ah, 9
-        mov dx, offset pliusas_
-        int 21h
-        
+    push ax 
+                                        
         cmp mod_part, 80h;Checkiname kokio ilgio baitas bus
         je format3_poslinkis_2baitai
             call getFirstByte
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx
+			
             mov byte ptr [thirdByte], al
-            jmp format3_poslinkis_next
+            jmp format3_spausdinimas_next
             
             format3_poslinkis_2baitai:
                 call getFirstByte
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
                 mov byte ptr [thirdByte], al
+				
                 call getFirstByte
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
                 mov byte ptr [Byte4], al
-                call print_jaunesnyji_baita_hexu
-                mov al, byte ptr [thirdByte]
                  
-       format3_poslinkis_next:                      
-        call print_vyresnyji_baita_hexu
-        
-    format3_lastCheck:
-        mov ah, 9
-        mov dx, offset sond_
-        int 21h
-            
-        cmp d_part, 0h
-            je format3_reg_pirmas_second         
-        jmp format3_end
-                               
-                               
-                                                          
-    format3_reg_pirmas_second:;DARBAS SU REG
-        mov ah, 9
-        mov dx, offset k_
-        int 21h
-        cmp w_part, 0h
-            je format3_reg_pirmas_second_byte
-            
-        format3_reg_pirmas_second_word:
-            mov al, byte ptr[secondByte]
-            call print_reg_w1
-            jmp format3_end
-            
-        format3_reg_pirmas_second_byte:
-            mov al, byte ptr[secondByte]
-            call print_reg_w0 
+        format3_spausdinimas_next:
+		
+		call spausdink_reg_or_rm_su_vardu	
               
     format3_end:
         pop ax
 RET
 
 
-
-
-
 print_formatui4: ;formatui (xxxx xxxw mod xxx r/m [poslinkis] bojb [bojbv])
     push ax
-    call spausdink_varda
     
-    mov ah, 9
-    mov dx, offset sonk_
-    int 21h
-    mov al, byte ptr[secondByte]
-    call spausdink_pagal_mod
     cmp mod_part, 0C0h
         je format4_antras_baitas
     cmp mod_part, 0h
@@ -926,90 +784,116 @@ print_formatui4: ;formatui (xxxx xxxw mod xxx r/m [poslinkis] bojb [bojbv])
                     
                     
     format4_poslinkis:
-        mov ah, 9
-        mov dx, offset pliusas_
-        int 21h
         
         cmp mod_part, 80h;Checkiname kokio ilgio baitas bus (2)
         je format4_poslinkis_2baitai
             call getFirstByte
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx
+			
             mov byte ptr [thirdByte], al
-            jmp format4_poslinkis_next
+            jmp format4_antras_baitas
             
             format4_poslinkis_2baitai:
                 call getFirstByte
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
                 mov byte ptr [thirdByte], al
                 call getFirstByte
-                mov byte ptr [Byte4], al
-                call print_jaunesnyji_baita_hexu
-                mov al, byte ptr [thirdByte]
-                 
-       format4_poslinkis_next:                      
-        call print_vyresnyji_baita_hexu
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
+                mov byte ptr [Byte4], al 
+	
         
     format4_antras_baitas: ; bojb bovb
-        mov ah, 9
-        mov dx, offset sond_
-        int 21h
-        mov dx, offset k_
-        int 21h  
         cmp w_part, 1h
             je format4_2baitu_bojb_bovb
             call getFirstByte
-            call print_baita_hexu
+			mov byte ptr [bojb_baitas], al
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx
+			
             jmp format4_end
                 
         format4_2baitu_bojb_bovb:
             call getFirstByte
-            call print_jaunesnyji_baita_hexu
-            call getFirstByte   
-            call print_vyresnyji_baita_hexu
+			mov byte ptr [bojb_baitas], al
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx
+			
+            call getFirstByte
+			mov byte ptr [bovb_baitas], al
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx			
             
     format4_end:
+	call spausdink_rm
+	call spausdink_bojb_bovb
+	
     pop ax
 RET
 
-print_formatui5: ;formatui (xxxx xxxw mod xxx r/m [poslinkis] bojb [bojbv])
+print_formatui5: ;formatui (xxxx xxxw mod xxx r/m [poslinkis])
     push ax
-    call spausdink_varda
     
-    mov ah, 9
-    mov dx, offset sonk_
-    int 21h
-    mov al, byte ptr[secondByte]
-    call spausdink_pagal_mod  
     cmp mod_part, 0C0h
         je format5_end
     cmp mod_part, 0h
         je format5_end                   
                     
     format5_poslinkis:
-        mov ah, 9
-        mov dx, offset pliusas_
-        int 21h
-        
         cmp mod_part, 80h ;Checkiname kokio ilgio baitas bus (2)
         je format5_poslinkis_2baitai
             call getFirstByte
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx
+			
             mov byte ptr [thirdByte], al
-            jmp format5_poslinkis_next
+            jmp format5_end
             
             format5_poslinkis_2baitai:
                 call getFirstByte
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
                 mov byte ptr [thirdByte], al
                 call getFirstByte
-                mov byte ptr [Byte4], al
-                call print_jaunesnyji_baita_hexu
-                mov al, byte ptr [thirdByte]
-                 
-       format5_poslinkis_next:                      
-        call print_vyresnyji_baita_hexu
-        
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
+                mov byte ptr [Byte4], al 
             
     format5_end:
-    mov ah, 9
-    mov dx, offset sond_
-    int 21h
+		call spausdink_rm
     pop ax
 RET
 
@@ -1032,107 +916,173 @@ RET
 print_formatui8: ;formatui (xxxx xxxw ajb avb)
     
     push ax
-	mov ah,9
-    mov dx, offset c_MOV
-    int 21h
+
+    call getFirstByte
+				
+	push dx
+	mov dl, al
+	call idekSkaiciu
+	pop dx
+				
+    mov byte ptr [thirdByte], al
+				
+    call getFirstByte
+				
+	push dx
+	mov dl, al
+	call idekSkaiciu
+	pop dx
+				
+    mov byte ptr [Byte4], al
+	
+	;SPAUSDINAME
+	
 	cmp d_part, 0h
-		je ax_bus_pirmas
-		jmp ax_bus_antras
+		je pre_ax_bus_pirmas
+		jmp pre_ax_bus_antras
 		
+	pre_ax_bus_pirmas:
+		call trysTarpai
+		call spausdink_mov
 	ax_bus_pirmas:
 		cmp w_part, 0h
 		je ax_bus_pirmas_w0
 		jmp ax_bus_pirmas_w1
 		
 		ax_bus_pirmas_w0:
-			mov ah,9
-			mov dx, offset r_AL
-			int 21h
+			call spausdink_al
+			
 			cmp d_part, 0h
-			jne print_formatui8_end
-			mov dx, offset k_
-			int 21h
+				jne print_formatui8_end
+			call spausdink_k	
 			jmp ax_bus_antras
 		
 		ax_bus_pirmas_w1:
-			mov ah,9
-			mov dx, offset r_AX
-			int 21h
+			call spausdink_ax
 			cmp d_part, 0h
 			jne print_formatui8_end
-			mov dx, offset k_
-			int 21h
-			jmp ax_bus_antras	
+			call spausdink_k
+			jmp ax_bus_antras
 			
+    pre_ax_bus_antras:
+		call trysTarpai
+		call spausdink_mov
+		
 	ax_bus_antras:
-		cmp w_part, 1h;Checkiname kokio ilgio baitas bus (2)
-        je format8_poslinkis_2baitai
-            call getFirstByte
-            mov byte ptr [thirdByte], al
-            jmp format8_poslinkis_next
-            
-            format8_poslinkis_2baitai:
-                call getFirstByte
-                mov byte ptr [thirdByte], al
-                call getFirstByte
-                mov byte ptr [Byte4], al
-                call print_jaunesnyji_baita_hexu
-                mov al, byte ptr [thirdByte]
-                 
-       format8_poslinkis_next:                      
-         call print_vyresnyji_baita_hexu
-		 cmp d_part, 0h
-			jne ax_bus_pirmas_temp
-			jmp print_formatui8_end
-		ax_bus_pirmas_temp:	
-		 mov ah, 9
-		 mov dx, offset k_ 
-		 int 21h
-		jmp ax_bus_pirmas	 
-    
+		 call spausdink_sonk
+		 mov dl, byte ptr [Byte4]
+		 call idekSkaiciu
+		 mov dl, byte ptr [thirdByte]
+		 call idekSkaiciu
+		 call spausdink_sond
+	cmp d_part, 0h
+		je print_formatui8_end
+		call spausdink_k
+		jmp ax_bus_pirmas
+		
 	print_formatui8_end:
     pop ax
     
 RET
 
+
 print_formatui9: ;(xxxx xreg)
     push ax
-    mov ah,9
-    mov dx, offset c_MOV
-    int 21h
-    mov al, byte ptr[rm_part]
+	
 	cmp w_part, 08h
 	je spausdink_rm_w1_formatui9
 	jmp spausdink_rm_w0_formatui9
 	spausdink_rm_w1_formatui9:
-		call print_rm_w1_mod11
-		mov ah,9
-		mov dx, offset k_
-		int 21h
 		call getFirstByte
+		
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
+		
         mov byte ptr [thirdByte], al
+		
         call getFirstByte
+		
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
+		
         mov byte ptr [Byte4], al
-        call print_jaunesnyji_baita_hexu
-        mov al, byte ptr [thirdByte]
+		
+		call trysTarpai
+		call spausdink_mov
+		mov al, byte ptr[firstByte]
+		call print_rm_w1_mod11
+		call spausdink_k
+		mov al, byte ptr [Byte4]
+		call print_jaunesnyji_baita_hexu
+		mov al, byte ptr [thirdByte]
 		call print_vyresnyji_baita_hexu
 		
 		jmp print_formatui9_end
 	spausdink_rm_w0_formatui9:
-		call print_rm_w0_mod11
-		mov ah,9
-		mov dx, offset k_
-		int 21h
 		call getFirstByte
+		
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
+		
         mov byte ptr [thirdByte], al
+		
+		call trysTarpai
+		call spausdink_mov
+		mov al, byte ptr[firstByte]
+		call print_rm_w0_mod11
+		call spausdink_k
+		mov al, byte ptr [thirdByte]
 		call print_vyresnyji_baita_hexu
 		
 	print_formatui9_end:
     pop ax
 RET
+
 print_formatui10: ;(xxxx xxxw)
     push ax
+
+	cmp w_part, 0h
+	je spausdink_rm_w0_formatui10
+	jmp spausdink_rm_w1_formatui10
 	
+	spausdink_rm_w1_formatui10:
+		call getFirstByte
+		
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
+		
+        mov byte ptr [bojb_baitas], al
+		
+        call getFirstByte
+		
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
+		
+        mov byte ptr [bovb_baitas], al
+		
+		jmp formatui10_next
+	spausdink_rm_w0_formatui10:
+		call getFirstByte
+		
+		push dx
+		mov dl, al
+		call idekSkaiciu
+		pop dx
+		
+        mov byte ptr [bojb_baitas], al
+		
+	formatui10_next:		
+		
 	cmp byte ptr[firstByte], 04h        ;ADD
 		jge gal_formatas10_interval
             jmp gal_desimtas1_format10
@@ -1156,129 +1106,93 @@ print_formatui10: ;(xxxx xxxw)
                     jle format10_cmp	
 	
 	format10_add:
-		mov ah,9
-		mov dx, offset c_ADD
-		int 21h
+		call trysTarpai
+		call spausdink_add
 		jmp sp_formatui10
 	format10_sub:
-		mov ah,9
-		mov dx, offset c_SUB
-		int 21h
+		call trysTarpai
+		call spausdink_sub
 		jmp sp_formatui10
 	format10_cmp:
-		mov ah,9
-		mov dx, offset c_CMP
-		int 21h
-	
-	
-	sp_formatui10:
-	cmp w_part, 0h
-	je spausdink_rm_w0_formatui10
-	jmp spausdink_rm_w1_formatui10
-	spausdink_rm_w1_formatui10:
-		mov ah,9
-		mov dx, offset r_AX
-		int 21h
-		mov ah,9
-		mov dx, offset k_
-		int 21h
-		call getFirstByte
-        mov byte ptr [thirdByte], al
-        call getFirstByte
-        mov byte ptr [Byte4], al
-        call print_jaunesnyji_baita_hexu
-        mov al, byte ptr [thirdByte]
-		call print_vyresnyji_baita_hexu
+		call trysTarpai
+		call spausdink_cmp
 		
+	sp_formatui10:		
+	cmp w_part, 0h	
+	je spausdink_rm_w0_formatui10_2
+	jmp spausdink_rm_w1_formatui10_2
+	
+	spausdink_rm_w0_formatui10_2:
+		call spausdink_al
+		call spausdink_bojb_bovb
 		jmp print_formatui10_end
-	spausdink_rm_w0_formatui10:
-		mov ah,9
-		mov dx, offset r_AL
-		int 21h
-		mov ah,9
-		mov dx, offset k_
-		int 21h
-		call getFirstByte
-        mov byte ptr [thirdByte], al
-		call print_vyresnyji_baita_hexu
-		
+	spausdink_rm_w1_formatui10_2:
+		call spausdink_ax
+		call spausdink_bojb_bovb
+	
 	print_formatui10_end:
     pop ax
 RET
 
-print_formatui11: ;formatui (xxxx xxxw mod xxx r/m [poslinkis] bojb [bojbv])
+print_formatui11: ;formatui (xxxx xxsw mod xxx r/m [poslinkis] bojb [bojbv]) tas kur veliau
     push ax
-    
-	cmp reg_part, 00h
-		je formatui11_add
-	cmp reg_part, 0A0h
-		je formatui11_sub
-	jmp formatui11_cmp
 	
-	formatui11_add:
-		mov ah, 9
-        mov dx, offset c_ADD
-        int 21h
-		jmp formatui11_next_step
-	formatui11_cmp:
-		mov ah, 9
-        mov dx, offset c_CMP
-        int 21h
-		jmp formatui11_next_step
-	formatui11_sub:
-		mov ah, 9
-        mov dx, offset c_SUB
-        int 21h
-		
-    formatui11_next_step:
-	
-    mov ah, 9
-    mov dx, offset sonk_
-    int 21h
-    mov al, byte ptr[secondByte]
-    call spausdink_pagal_mod  
     cmp mod_part, 0C0h
         je format11_end_temp
     cmp mod_part, 0h
         je format11_end_temp                   
                     
     format11_poslinkis:
-        mov ah, 9
-        mov dx, offset pliusas_
-        int 21h
         
         cmp mod_part, 80h ;Checkiname kokio ilgio baitas bus (2)
         je format11_poslinkis_2baitai
             call getFirstByte
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx
+			
             mov byte ptr [thirdByte], al
-            jmp format11_poslinkis_next
+			
+            jmp format11_end_temp
             
             format11_poslinkis_2baitai:
                 call getFirstByte
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
                 mov byte ptr [thirdByte], al
+				
                 call getFirstByte
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
                 mov byte ptr [Byte4], al
-                call print_jaunesnyji_baita_hexu
-                mov al, byte ptr [thirdByte]
                  
-       format11_poslinkis_next:                      
-        call print_vyresnyji_baita_hexu
         
         format11_end_temp:
-			mov ah, 9
-			mov dx, offset sond_
-			int 21h
-			mov ah, 9
-			mov dx, offset k_
-			int 21h
 			cmp w_part, 00h
 				je format11_vienas_baitas
 				jmp format11_pagal_s
 				
 			format11_vienas_baitas:
 				call getFirstByte
-				call print_vyresnyji_baita_hexu
-				jmp format11_end
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
+				mov byte ptr [bojb_baitas], al
+				
+				jmp tesk_darba
 				
 			format11_pagal_s:
 				cmp d_part, 00h
@@ -1287,29 +1201,98 @@ print_formatui11: ;formatui (xxxx xxxw mod xxx r/m [poslinkis] bojb [bojbv])
 				
 			format11_2_baitai:
 				call getFirstByte
-				call print_jaunesnyji_baita_hexu
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
+				mov byte ptr [bojb_baitas], al
 				call getFirstByte
-				call print_vyresnyji_baita_hexu
-				jmp format11_end
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
+				mov byte ptr [bovb_baitas], al
+				
+				jmp tesk_darba
 			
 			format11_baitu_nuskaitymas_pletimas:
 				call getFirstByte
-				mov byte ptr [thirdByte], al
+				
+				mov byte ptr [bojb_baitas], al
+				
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
+				
+				
 				cmp al, 79h
 					ja format11_byte_greater
 					jmp format11_byte_lower
 				format11_byte_greater:
 					mov al, 0FFh
-					call print_jaunesnyji_baita_hexu
-					mov al, byte ptr [thirdByte]
-					call print_vyresnyji_baita_hexu
-					jmp format11_end
+					mov byte ptr [bovb_baitas], al
+					jmp tesk_darba
 				format11_byte_lower:
 					mov al, 00h
-					call print_jaunesnyji_baita_hexu
-					mov al, byte ptr [thirdByte]
-					call print_vyresnyji_baita_hexu
+					mov byte ptr [bovb_baitas], al
+					
+					
+	tesk_darba:				
+	cmp reg_part, 00h
+		je formatui11_add
+	cmp reg_part, 28h
+		je formatui11_sub
+	jmp formatui11_cmp
+	
+	formatui11_add:
+		call trysTarpai
+		call spausdink_add
+		jmp formatui11_next_step
+	formatui11_cmp:
+		call trysTarpai
+		call spausdink_cmp
+		jmp formatui11_next_step
+	formatui11_sub:
+		call trysTarpai
+		call spausdink_sub
+		
+    formatui11_next_step:					
+		call spausdink_rm_be_vardo
+		call spausdink_k
+		
+		cmp w_part, 00h
+			je format11_vienas_baitas2
+			jmp format11_pagal_s2
+			
+			format11_vienas_baitas2:
+				mov al, byte ptr [bojb_baitas]
+				call print_vyresnyji_baita_hexu
+				jmp format11_end
 				
+			format11_pagal_s2:
+				cmp d_part, 00h
+				je format11_2_baitai2
+				jmp format11_baitu_nuskaitymas_pletimas2
+				
+			format11_2_baitai2:
+				call print_jaunesnyji_baita_hexu
+				mov al, byte ptr [bojb_baitas]
+				call print_vyresnyji_baita_hexu
+				mov al, byte ptr [bovb_baitas]
+				
+				jmp format11_end
+			
+			format11_baitu_nuskaitymas_pletimas2:
+				mov al, byte ptr [bovb_baitas]
+				call print_jaunesnyji_baita_hexu
+				mov al, byte ptr [bojb_baitas]
+				call print_vyresnyji_baita_hexu
+		
     format11_end:
     pop ax
 RET
@@ -1322,14 +1305,9 @@ print_formatui0:
     push bx
     push cx
     push dx
-        mov ah, 9
-        mov dx, offset neatp_pradzia
-        int 21h
             mov al, byte ptr[firstByte] ;Argumentas sekanciai procedurai (parametras)
-            call print_baita_hexu
-        mov ah, 9
-        mov dx, offset neatp_pabaiga
-        int 21h
+			call trysTarpai
+			call spausdink_neatpazinta
     pop dx
     pop cx
     pop bx
@@ -1338,6 +1316,123 @@ RET
 
 ;------------------------------------------------------------------------------------------------------
 ;******************************************************************************************************
+
+
+spausdink_rm:
+	call trysTarpai
+	call spausdink_varda
+   
+    mov al, byte ptr[secondByte]
+	call spausdink_sonk
+    call spausdink_pagal_mod
+    cmp mod_part, 0C0h
+        je spausdink_rm_end
+	cmp mod_part, 0h
+        je spausdink_rm_end
+		
+	call skaiciuokPoslinki
+	
+	spausdink_rm_end:
+	call spausdink_sond
+ret
+
+spausdink_rm_be_vardo:
+    mov al, byte ptr[secondByte]
+	call spausdink_sonk
+    call spausdink_pagal_mod
+    cmp mod_part, 0C0h
+        je spausdink_rm_be_end
+	cmp mod_part, 0h
+        je spausdink_rm_be_end
+		
+	call skaiciuokPoslinki
+	
+	spausdink_rm_be_end:
+	call spausdink_sond
+ret
+
+
+spausdink_bojb_bovb:
+		call spausdink_k
+		cmp w_part, 1h
+			je dubaitu_bojb_bovb
+			mov al, byte ptr [bojb_baitas]
+            call print_baita_hexu
+            jmp spausdink_bojb_bovb_end
+                
+        dubaitu_bojb_bovb:
+			mov al, byte ptr [bovb_baitas]
+            call print_jaunesnyji_baita_hexu
+			mov al, byte ptr [bojb_baitas]
+            call print_vyresnyji_baita_hexu
+			
+spausdink_bojb_bovb_end:			
+ret
+
+
+
+skaiciuokPoslinki:
+	push ax
+		call spausdink_pliusa
+        cmp mod_part, 80h
+        je poslinkis_2baitai
+            mov al, byte ptr [thirdByte]
+            jmp poslinkis_next
+            
+            poslinkis_2baitai:
+                mov al, byte ptr [Byte4]
+                call print_jaunesnyji_baita_hexu
+                mov al, byte ptr [thirdByte]
+                 
+        poslinkis_next:                      
+			call print_vyresnyji_baita_hexu
+	pop ax
+ret
+
+
+
+spausdink_reg_or_rm_su_vardu:
+	call trysTarpai
+	call spausdink_varda
+    cmp d_part, 0h
+        je reg_antras
+		jmp reg_pirmas
+    pre_reg_pirmas:
+		call spausdink_k
+		
+    reg_pirmas:;DARBAS SU REG
+        cmp w_part, 0h
+            je reg_pirmas_byte
+            
+        reg_pirmas_word:
+            mov al, byte ptr[secondByte]
+            call print_reg_w1
+            jmp pre_reg_antras
+        reg_pirmas_byte:
+            mov al, byte ptr[secondByte]
+            call print_reg_w0
+			
+		pre_reg_antras:	
+		cmp d_part, 0h
+            je spausdink_reg_or_rm_su_vardu_end	 
+		call spausdink_k
+    reg_antras:;DARBAS SU R/M
+        mov al, byte ptr[secondByte]
+		call spausdink_sonk
+        call spausdink_pagal_mod
+        cmp mod_part, 0C0h
+            je lastCheck
+        cmp mod_part, 0h
+            je lastCheck
+		
+		call skaiciuokPoslinki
+	lastCheck:
+		call spausdink_sond
+        cmp d_part, 0h
+            je reg_pirmas         
+			
+	spausdink_reg_or_rm_su_vardu_end:	
+ret
 	
 
 ;Spausdina komandos varda pagal pirma baita (bendru atveju pirma baita ir galbut antra, arba antro reg dali)
@@ -1349,15 +1444,13 @@ spausdink_varda_sreg:
     
     cmp rm_part, 06h
         je spausdink_varda_push
-        mov dx, offset c_POP
-        mov ah, 9
-        int 21h
+		call trysTarpai
+		call spausdink_pop
         jmp sreg_next  
         
     spausdink_varda_push:
-        mov dx, offset c_PUSH
-        mov ah, 9
-        int 21h    
+		call trysTarpai
+		call spausdink_push
     
     
     sreg_next:
@@ -1371,22 +1464,19 @@ spausdink_varda_sreg:
     jmp sreg_bus_ds
     
     sreg_bus_es:
-      mov bx, offset t_ES
+	  call spausdink_es
       jmp spausdink_sreg 
     sreg_bus_cs:
-      mov bx, offset t_CS
+	  call spausdink_cs
       jmp spausdink_sreg
     sreg_bus_ss:
-      mov bx, offset t_SS
+	  call spausdink_ss
       jmp spausdink_sreg
     sreg_bus_ds:
-      mov bx, offset t_DS
+	  call spausdink_ds
       jmp spausdink_sreg
       
-    spausdink_sreg:
-        mov ah,9
-        mov dx, bx
-        int 21h      
+    spausdink_sreg:     
        
     return_from_sreg_spausd:
         pop dx
@@ -1401,55 +1491,57 @@ spausdink_varda_sreg2_mov: ;(xxxx xxdx mod 0sr r/m [poslinkis])
     push cx
     push dx 
     
-	mov ah,9
-    mov dx, offset c_MOV
-    int 21h
-	cmp d_part, 0h
-		je r_m_will_be_first
-		jmp sreg_next2
-	r_m_will_be_first:
-		mov ah,9
-		mov dx, offset sonk_
-		int 21h
-		mov al, byte ptr [secondByte]
-		call spausdink_pagal_mod
 		cmp mod_part, 0C0h
-			je klausimas_del_sreg
+			je kai_jau_viska_zinome
 		cmp mod_part, 0h 
-			je klausimas_del_sreg
+			je kai_jau_viska_zinome
+			
 		cmp mod_part, 80h ;Checkiname kokio ilgio baitas bus (2)
-		    mov ah,9
-			mov dx, offset pliusas_
-			int 21h
 			je format7_poslinkis_2baitai_mov
+			
             call getFirstByte
+			
+			push dx
+			mov dl, al
+			call idekSkaiciu
+			pop dx
+			
             mov byte ptr [thirdByte], al
-            jmp format7_poslinkis_next
+			
+            jmp kai_jau_viska_zinome
             
             format7_poslinkis_2baitai_mov:
+			
                 call getFirstByte
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
                 mov byte ptr [thirdByte], al
+				
                 call getFirstByte
+				push dx
+				mov dl, al
+				call idekSkaiciu
+				pop dx
                 mov byte ptr [Byte4], al
-                call print_jaunesnyji_baita_hexu
-                mov al, byte ptr [thirdByte]
-                 
-       format7_poslinkis_next:                      
-           call print_vyresnyji_baita_hexu
-		   mov ah,9
-			mov dx, offset sond_
-			int 21h
-		   cmp d_part, 0h
-		   je kablelis
-		   jmp return_from_sreg_spausd2
-    klausimas_del_sreg:
-		cmp d_part, 0h
-			je kablelis
-			jmp return_from_sreg_spausd2
-			kablelis:
-			mov ah, 9
-			mov dx, offset k_
-			int 21h
+	;KAI JAU VISKA ZINOME
+	kai_jau_viska_zinome:
+    cmp d_part, 0h
+		je r_m_will_be_first
+	jmp pre_sreg_next2
+		
+	r_m_will_be_first:
+		call trysTarpai
+		call spausdink_mov
+		call spausdink_rm_be_vardo
+		call spausdink_k
+		jmp sreg_next2
+		
+	pre_sreg_next2:
+		call trysTarpai
+		call spausdink_mov
+	
     sreg_next2:
     cmp sreg_part, 0h
         je sreg_bus_es2
@@ -1461,31 +1553,26 @@ spausdink_varda_sreg2_mov: ;(xxxx xxdx mod 0sr r/m [poslinkis])
     jmp sreg_bus_ds2
     
     sreg_bus_es2:
-      mov bx, offset t_ES
+	  call spausdink_es
       jmp spausdink_sreg2 
     sreg_bus_cs2:
-      mov bx, offset t_CS
+	  call spausdink_cs
       jmp spausdink_sreg2
     sreg_bus_ss2:
-      mov bx, offset t_SS
+	  call spausdink_ss
       jmp spausdink_sreg2
     sreg_bus_ds2:
-      mov bx, offset t_DS
+	  call spausdink_ds
       jmp spausdink_sreg2
       
     spausdink_sreg2:
-        mov ah,9
-        mov dx, bx
-        int 21h
-		mov dx, offset k_
-		int 21h
+		cmp d_part, 0h
+			je return_from_sreg_spausd2
+			
+		call spausdink_k
+		call spausdink_rm_be_vardo
     
-	cmp d_part, 0h
-		jne r_m_will_be_first_temp
-		
-	jmp return_from_sreg_spausd2
-		r_m_will_be_first_temp:
-			jmp r_m_will_be_first
+			
     return_from_sreg_spausd2:
         pop dx
         pop cx
@@ -1548,15 +1635,21 @@ spausdink_varda:
            jmp spausdink_varda_nr_next0
            spausdink_varda_interval1:
                 cmp byte ptr[firstByte], 8Bh
-                    jle komanda_mov          
-                    
+                    jle komanda_mov2_temp
+					jmp spausdink_varda_nr_next0
+					komanda_mov2_temp:
+						jmp komanda_mov
     spausdink_varda_nr_next0:                
     cmp byte ptr[firstByte], 00h
         jge spausdink_varda_interval0
            jmp spausdink_varda_nr_next01
            spausdink_varda_interval0:
                 cmp byte ptr[firstByte], 03h
-                    jle komanda_add
+                    jle komanda_add_temp1
+					jmp spausdink_varda_nr_next01
+					
+					komanda_add_temp1:
+						jmp komanda_add
                     
     spausdink_varda_nr_next01:                
     cmp byte ptr[firstByte], 28h
@@ -1602,33 +1695,41 @@ spausdink_varda:
     cmp byte ptr[firstByte], 47h
     ja gal_komanda_pop
     
-    komanda_inc: 
-        mov bx, offset c_INC
+    komanda_inc:
+		call trysTarpai
+		call spausdink_inc
         jmp vardo_spausdinimas 
     
     komanda_dec:
-        mov bx, offset c_DEC
+	    call trysTarpai
+		call spausdink_dec
         jmp vardo_spausdinimas
     komanda_push:
-        mov bx, offset c_PUSH  
+	    call trysTarpai
+		call spausdink_push
         jmp vardo_spausdinimas
         
     komanda_mov:
-        mov bx, offset c_MOV  
+	    call trysTarpai
+		call spausdink_mov		
         jmp vardo_spausdinimas
         
     komanda_sub:
-        mov bx, offset c_SUB  
+		call trysTarpai
+		call spausdink_sub		
         jmp vardo_spausdinimas
         
     komanda_add:
-        mov bx, offset c_ADD  
+		call trysTarpai
+		call spausdink_add
         jmp vardo_spausdinimas
     komanda_cmp:
-        mov bx, offset c_CMP  
+		call trysTarpai
+		call spausdink_cmp
         jmp vardo_spausdinimas
     komanda_pop:
-        mov bx, offset c_POP
+		call trysTarpai
+		call spausdink_pop
         jmp vardo_spausdinimas    
     komanda_PUSH_INC_DEC:
         cmp reg_part, 30h
@@ -1641,10 +1742,12 @@ spausdink_varda:
             je komanda_MUL
             jmp komanda_DIV
             komanda_MUL:
-                mov bx, offset c_MUL  
+				call trysTarpai
+				call spausdink_mul
                 jmp vardo_spausdinimas
             komanda_DIV:
-                mov bx, offset c_DIV
+				call trysTarpai
+				call spausdink_div
                 jmp vardo_spausdinimas    
                    
     gal_komanda_pop:
@@ -1653,18 +1756,16 @@ spausdink_varda:
         cmp byte ptr[firstByte], 5Fh
         ja gal_komanda_int
         ;vis tik cia POP
-        mov bx, offset c_POP
+		call trysTarpai
+		call spausdink_pop
         jmp vardo_spausdinimas
 
     gal_komanda_int:
         cmp byte ptr[firstByte], 0CDh
         jne returnfrom_vardo_spausd ;griztam is vardo spausdinimo, nes nepazistam komandos
-        mov bx, offset c_INT
+		call spausdink_int
 
-    vardo_spausdinimas:
-        mov ah,9
-        mov dx, bx
-        int 21h       
+    vardo_spausdinimas:      
     
     returnfrom_vardo_spausd:
         pop dx
@@ -1719,18 +1820,8 @@ print_jaunesnyji_baita_hexu:
    push bx
    push cx
    push dx
-        push ax
-            and al, 11110000b
-                mov cl, 4
-                shr al, cl ;stumiam al bitus i desine per 4 vietas (prireike CL)
-                            ;nes SHR antras operandas tik is aibes {1,CL}
-                call print_hex_skaitmuo
-        pop ax
-
-        push ax
-            and al, 00001111b
-            call print_hex_skaitmuo
-        pop ax
+		mov dl, al
+		call idekSkaiciu
 
    pop dx
    pop cx
@@ -1743,21 +1834,14 @@ print_vyresnyji_baita_hexu:
    push bx
    push cx
    push dx
-        push ax
-            and al, 11110000b
-                mov cl, 4
-                shr al, cl ;stumiam al bitus i desine per 4 vietas (prireike CL)
-                            ;nes SHR antras operandas tik is aibes {1,CL}
-                call print_hex_skaitmuo
-        pop ax
-
-        push ax
-            and al, 00001111b
-            call print_hex_skaitmuo
-        pop ax
-        mov ah, 2
-        mov dl, 'h'
-        int 21h
+   
+		mov dl, al
+		call idekSkaiciu
+		
+		mov byte ptr [di], 'h'
+		inc di
+		inc bp
+		
    pop dx
    pop cx
    pop bx
@@ -1770,65 +1854,24 @@ print_baita_hexu:
    push cx
    push dx
         push ax
-            mov dl, '0' ;spausdina 0 priekyj
-            mov ah, 2
-            int 21h
+			mov byte ptr [di], '0'
+			inc di 
+			inc bp
         pop ax
-
-        push ax
-            and al, 11110000b
-                mov cl, 4
-                shr al, cl ;stumiam al bitus i desine per 4 vietas (prireike CL)
-                            ;nes SHR antras operandas tik is aibes {1,CL}
-                call print_hex_skaitmuo
-        pop ax
-
-        push ax
-            and al, 00001111b
-            call print_hex_skaitmuo
-        pop ax
-
-        mov ah, 2
-        mov dl, 'h'
-        int 21h
+		
+				mov dl, al
+				call idekSkaiciu
+				
+		
+		mov byte ptr [di], 'h'
+		inc di
+		inc bp
+		
    pop dx
    pop cx
    pop bx
    pop ax
 RET
-
-print_hex_skaitmuo:
-    push ax
-    push dx
-        and al, 00001111b  ;isvalom vyresni pusbaiti jis musu nedomins
-        cmp al, 9
-        ja print_hex_raidyte
-        jmp print_hex_skaiciukas
-
-        print_hex_raidyte:
-        push ax
-        sub al, 0Ah
-        add al, 'A'
-        mov ah, 2
-        mov dl, al
-        int 21h
-        pop ax
-        jmp grizti_is_pr_hex_sk
-
-        print_hex_skaiciukas:
-        push ax
-        add al, 30h
-        mov ah, 2
-        mov dl, al
-        int 21h
-        pop ax
-        jmp grizti_is_pr_hex_sk
-
-    grizti_is_pr_hex_sk:
-    pop dx
-    pop ax
-RET
-
 
 	
 ;************************************************************************************************************************************************************************	
@@ -1990,41 +2033,38 @@ print_reg_w1:
             jmp reg_w1_111
 
                 reg_w1_000:
-                mov bx, offset r_AX
+				call spausdink_ax
                 jmp reg_w1_spausd
 
                 reg_w1_001:
-                mov bx, offset r_CX
+				call spausdink_cx
                 jmp reg_w1_spausd
 
                 reg_w1_010:
-                mov bx, offset r_DX
+				call spausdink_dx
                 jmp reg_w1_spausd
 
                 reg_w1_011:
-                mov bx, offset r_BX
+				call spausdink_bx
                 jmp reg_w1_spausd
                 ;----
                 reg_w1_100:
-                mov bx, offset r_SP
+				call spausdink_sp
                 jmp reg_w1_spausd
 
                 reg_w1_101:
-                mov bx, offset r_BP
+				call spausdink_bp
                 jmp reg_w1_spausd
 
                 reg_w1_110:
-                mov bx, offset r_SI
+				call spausdink_si
                 jmp reg_w1_spausd
 
                 reg_w1_111:
-                mov bx, offset r_DI
+				call spausdink_di
                 jmp reg_w1_spausd
 
     reg_w1_spausd:
-    mov ah, 9
-    mov dx, bx
-    int 21h
 
     pop dx
     pop cx
@@ -2077,42 +2117,38 @@ print_reg_w0:
             jmp reg_w0_111
 
                 reg_w0_000:
-                mov bx, offset r_AL
+				call spausdink_al
                 jmp reg_w0_spausd
 
                 reg_w0_001:
-                mov bx, offset r_CL
+				call spausdink_cl
                 jmp reg_w0_spausd
 
                 reg_w0_010:
-                mov bx, offset r_DL
+				call spausdink_dl
                 jmp reg_w0_spausd
 
                 reg_w0_011:
-                mov bx, offset r_BL
+				call spausdink_bl
                 jmp reg_w0_spausd
                 ;----
                 reg_w0_100:
-                mov bx, offset r_AH
+				call spausdink_ah
                 jmp reg_w0_spausd
 
                 reg_w0_101:
-                mov bx, offset r_CH
+				call spausdink_ch
                 jmp reg_w0_spausd
 
                 reg_w0_110:
-                mov bx, offset r_DH
+				call spausdink_dh
                 jmp reg_w0_spausd
 
                 reg_w0_111:
-                mov bx, offset r_BH
+				call spausdink_bh
                 jmp reg_w0_spausd
 
     reg_w0_spausd:
-    mov ah, 9
-    mov dx, bx
-    int 21h
-
     pop dx
     pop cx
     pop bx
@@ -2169,41 +2205,38 @@ print_rm_w1_mod11:
             jmp rm_w1_mod11_111
 
                 rm_w1_mod11_000:
-                mov bx, offset r_AX
+				call spausdink_ax
                 jmp rm_w1_mod11_spausd
 
                 rm_w1_mod11_001:
-                mov bx, offset r_CX
+				call spausdink_cx
                 jmp rm_w1_mod11_spausd
 
                 rm_w1_mod11_010:
-                mov bx, offset r_DX
+				call spausdink_dx
                 jmp rm_w1_mod11_spausd
 
                 rm_w1_mod11_011:
-                mov bx, offset r_BX
+				call spausdink_bx
                 jmp rm_w1_mod11_spausd
                 ;----
                 rm_w1_mod11_100:
-                mov bx, offset r_SP
+				call spausdink_sp
                 jmp rm_w1_mod11_spausd
 
                 rm_w1_mod11_101:
-                mov bx, offset r_BP
+				call spausdink_bp
                 jmp rm_w1_mod11_spausd
 
                 rm_w1_mod11_110:
-                mov bx, offset r_SI
+				call spausdink_si
                 jmp rm_w1_mod11_spausd
 
                 rm_w1_mod11_111:
-                mov bx, offset r_DI
+				call spausdink_di
                 jmp rm_w1_mod11_spausd
 
     rm_w1_mod11_spausd:
-    mov ah, 9
-    mov dx, bx
-    int 21h
 
     pop dx
     pop cx
@@ -2256,41 +2289,38 @@ print_rm_w0_mod11:
             jmp rm_w0_mod11_111
 
                 rm_w0_mod11_000:
-                mov bx, offset r_AL
+				call spausdink_al
                 jmp rm_w0_mod11_spausd
 
                 rm_w0_mod11_001:
-                mov bx, offset r_CL
+				call spausdink_cl
                 jmp rm_w0_mod11_spausd
 
                 rm_w0_mod11_010:
-                mov bx, offset r_DL
+				call spausdink_dl
                 jmp rm_w0_mod11_spausd
 
                 rm_w0_mod11_011:
-                mov bx, offset r_BL
+				call spausdink_bl
                 jmp rm_w0_mod11_spausd
                 ;----
                 rm_w0_mod11_100:
-                mov bx, offset r_AH
+				call spausdink_ah
                 jmp rm_w0_mod11_spausd
 
                 rm_w0_mod11_101:
-                mov bx, offset r_CH
+				call spausdink_ch
                 jmp rm_w0_mod11_spausd
 
                 rm_w0_mod11_110:
-                mov bx, offset r_DH
+				call spausdink_dh
                 jmp rm_w0_mod11_spausd
 
                 rm_w0_mod11_111:
-                mov bx, offset r_BH
+				call spausdink_bh
                 jmp rm_w0_mod11_spausd
 
     rm_w0_mod11_spausd:
-    mov ah, 9
-    mov dx, bx
-    int 21h
 
     pop dx
     pop cx
@@ -2344,41 +2374,39 @@ print_rm_mod00:
             jmp rm_mod00_111
 
                 rm_mod00_000:
-                mov bx, offset ea_rm000
+				call spausdink_ea_rm_000
                 jmp rm_mod00_spausd
 
                 rm_mod00_001:
-                mov bx, offset ea_rm001
+				call spausdink_ea_rm_001
                 jmp rm_mod00_spausd
 
                 rm_mod00_010:
-                mov bx, offset ea_rm010
+				call spausdink_ea_rm_010
                 jmp rm_mod00_spausd
 
                 rm_mod00_011:
-                mov bx, offset ea_rm011
+				call spausdink_ea_rm_011
                 jmp rm_mod00_spausd
                 ;----
                 rm_mod00_100:
-                mov bx, offset ea_rm100
+				call spausdink_ea_rm_100
                 jmp rm_mod00_spausd
 
                 rm_mod00_101:
-                mov bx, offset ea_rm101
+				call spausdink_ea_rm_101
                 jmp rm_mod00_spausd
 
                 rm_mod00_110:
-                mov bx, offset ea_rm110 ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+                ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+				call spausdink_ea_rm_110
                 jmp rm_mod00_spausd
 
                 rm_mod00_111:
-                mov bx, offset ea_rm111
+				call spausdink_ea_rm_111
                 jmp rm_mod00_spausd
 
     rm_mod00_spausd:
-    mov ah, 9
-    mov dx, bx
-    int 21h
 
     pop dx
     pop cx
@@ -2430,41 +2458,39 @@ print_rm_mod01:
             jmp rm_mod01_111
 
                 rm_mod01_000:
-                mov bx, offset ea_rm000
+				call spausdink_ea_rm_000
                 jmp rm_mod01_spausd
 
                 rm_mod01_001:
-                mov bx, offset ea_rm001
+				call spausdink_ea_rm_001
                 jmp rm_mod01_spausd
 
                 rm_mod01_010:
-                mov bx, offset ea_rm010
+				call spausdink_ea_rm_010
                 jmp rm_mod01_spausd
 
                 rm_mod01_011:
-                mov bx, offset ea_rm011
+				call spausdink_ea_rm_011
                 jmp rm_mod01_spausd
                 ;----
                 rm_mod01_100:
-                mov bx, offset ea_rm100
+				call spausdink_ea_rm_100
                 jmp rm_mod01_spausd
 
                 rm_mod01_101:
-                mov bx, offset ea_rm101
+				call spausdink_ea_rm_101
                 jmp rm_mod01_spausd
 
                 rm_mod01_110:
-                mov bx, offset ea_rm110 ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+                ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+				call spausdink_ea_rm_110
                 jmp rm_mod01_spausd
 
                 rm_mod01_111:
-                mov bx, offset ea_rm111
+				call spausdink_ea_rm_111
                 jmp rm_mod01_spausd
 
     rm_mod01_spausd:
-    mov ah, 9
-    mov dx, bx
-    int 21h
 
     pop dx
     pop cx
@@ -2516,41 +2542,39 @@ print_rm_mod10:
             jmp rm_mod10_111
 
                 rm_mod10_000:
-                mov bx, offset ea_rm000
+				call spausdink_ea_rm_000
                 jmp rm_mod10_spausd
 
                 rm_mod10_001:
-                mov bx, offset ea_rm001
+				call spausdink_ea_rm_001
                 jmp rm_mod10_spausd
 
                 rm_mod10_010:
-                mov bx, offset ea_rm010
+				call spausdink_ea_rm_010
                 jmp rm_mod10_spausd
 
                 rm_mod10_011:
-                mov bx, offset ea_rm011
+				call spausdink_ea_rm_011
                 jmp rm_mod10_spausd
                 ;----
                 rm_mod10_100:
-                mov bx, offset ea_rm100
+				call spausdink_ea_rm_100
                 jmp rm_mod10_spausd
 
                 rm_mod10_101:
-                mov bx, offset ea_rm101
+				call spausdink_ea_rm_101
                 jmp rm_mod10_spausd
 
                 rm_mod10_110:
-                mov bx, offset ea_rm110 ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+                ;****** CIA TURI BUTI TIESIOGINIS ADRESAS
+				call spausdink_ea_rm_110
                 jmp rm_mod10_spausd
 
                 rm_mod10_111:
-                mov bx, offset ea_rm111
+				call spausdink_ea_rm_111
                 jmp rm_mod10_spausd
 
     rm_mod10_spausd:
-    mov ah, 9
-    mov dx, bx
-    int 21h
 
     pop dx
     pop cx
@@ -2666,586 +2690,877 @@ ret
 ;**********************************************************************************************************************
 ;------------------------------------------------------------------------------------------------------
 
+;**********************************************************************************************************************
+;------------------------------------------------------------------------------------------------------
+idekSkaiciu:
+    push dx
+	and dl, 11110000b
+	push cx
+	mov cl, 4
+	shr dl, cl
+	pop cx
+	cmp dl, 9h
+	jge next__pradzia
+	add dl, 30h
+	jmp next2__pradzia
+	next__pradzia:
+	    add dl, 55
+	next2__pradzia:    
+	MOV	[di], dl
+	INC	di
+	inc bp
+	pop dx
+	push dx
+	and dl, 00001111b
+	cmp dl, 9h
+	jg next3__pradzia
+	add dl, 30h
+	jmp next4__pradzia
+	next3__pradzia:
+	    add dl, 55
+	next4__pradzia:  
+	MOV	[di], dl
+	INC	di
+	inc bp
+	pop dx
+ret
 spausdink_mov:
-	mov [di], 'M'
+	mov byte ptr [di], 'M'
 	inc di
-	mov [di], 'O'
+	inc bp
+	mov byte ptr [di], 'O'
 	inc di
-	mov [di], 'V'
+	inc bp
+	mov byte ptr [di], 'V'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_add:
-	mov [di], 'A'
+	mov byte ptr [di], 'A'
 	inc di
-	mov [di], 'D'
+	inc bp
+	mov byte ptr [di], 'D'
 	inc di
-	mov [di], 'D'
+	inc bp
+	mov byte ptr [di], 'D'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_inc:
-	mov [di], 'I'
+	mov byte ptr [di], 'I'
 	inc di
-	mov [di], 'N'
+	inc bp
+	mov byte ptr [di], 'N'
 	inc di
-	mov [di], 'C'
+	inc bp
+	mov byte ptr [di], 'C'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_dec:
-	mov [di], 'D'
+	mov byte ptr [di], 'D'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], 'C'
+	inc bp
+	mov byte ptr [di], 'C'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_pop:
-	mov [di], 'P'
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], 'O'
+	inc bp
+	mov byte ptr [di], 'O'
 	inc di
-	mov [di], 'P'
+	inc bp
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_push:
-	mov [di], 'P'
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], 'U'
+	inc bp
+	mov byte ptr [di], 'U'
 	inc di
-	mov [di], 'S'
+	inc bp
+	mov byte ptr [di], 'S'
 	inc di
-	mov [di], 'H'
+	inc bp
+	mov byte ptr [di], 'H'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_int:
-	mov [di], 'I'
+	mov byte ptr [di], 'I'
 	inc di
-	mov [di], 'N'
+	inc bp
+	mov byte ptr [di], 'N'
 	inc di
-	mov [di], 'T'
+	inc bp
+	mov byte ptr [di], 'T'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_sub:
-	mov [di], 'S'
+	mov byte ptr [di], 'S'
 	inc di
-	mov [di], 'U'
+	inc bp
+	mov byte ptr [di], 'U'
 	inc di
-	mov [di], 'B'
+	inc bp
+	mov byte ptr [di], 'B'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_cmp:
-	mov [di], 'C'
+	mov byte ptr [di], 'C'
 	inc di
-	mov [di], 'M'
+	inc bp
+	mov byte ptr [di], 'M'
 	inc di
-	mov [di], 'P'
+	inc bp
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_mul:
-	mov [di], 'M'
+	mov byte ptr [di], 'M'
 	inc di
-	mov [di], 'U'
+	inc bp
+	mov byte ptr [di], 'U'
 	inc di
-	mov [di], 'L'
+	inc bp
+	mov byte ptr [di], 'L'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_div:
-	mov [di], 'D'
+	mov byte ptr [di], 'D'
 	inc di
-	mov [di], 'I'
+	inc bp
+	mov byte ptr [di], 'I'
 	inc di
-	mov [di], 'V'
+	inc bp
+	mov byte ptr [di], 'V'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_call:
-	mov [di], 'C'
+	mov byte ptr [di], 'C'
 	inc di
-	mov [di], 'A'
+	inc bp
+	mov byte ptr [di], 'A'
 	inc di
-	mov [di], 'L'
+	inc bp
+	mov byte ptr [di], 'L'
 	inc di
-	mov [di], 'L'
+	inc bp
+	mov byte ptr [di], 'L'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_ret:
-	mov [di], 'R'
+	mov byte ptr [di], 'R'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], 'T'
+	inc bp
+	mov byte ptr [di], 'T'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_loop:
-	mov [di], 'L'
+	mov byte ptr [di], 'L'
 	inc di
-	mov [di], 'O'
+	inc bp
+	mov byte ptr [di], 'O'
 	inc di
-	mov [di], 'O'
+	inc bp
+	mov byte ptr [di], 'O'
 	inc di
-	mov [di], 'P'
+	inc bp
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jmp:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'M'
+	inc bp
+	mov byte ptr [di], 'M'
 	inc di
-	mov [di], 'P'
+	inc bp
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jo:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'O'
+	inc bp
+	mov byte ptr [di], 'O'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jno:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'O'
+	inc bp
+	mov byte ptr [di], 'O'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jnae:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'N'
+	inc bp
+	mov byte ptr [di], 'N'
 	inc di
-	mov [di], 'A'
+	inc bp
+	mov byte ptr [di], 'A'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jae:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'A'
+	inc bp
+	mov byte ptr [di], 'A'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_je:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jne:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'N'
+	inc bp
+	mov byte ptr [di], 'N'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jbe:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'B'
+	inc bp
+	mov byte ptr [di], 'B'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_ja:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'A'
+	inc bp
+	mov byte ptr [di], 'A'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_js:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'S'
+	inc bp
+	mov byte ptr [di], 'S'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jns:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'N'
+	inc bp
+	mov byte ptr [di], 'N'
 	inc di
-	mov [di], 'S'
+	inc bp
+	mov byte ptr [di], 'S'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jp:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'P'
+	inc bp
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jnp:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'N'
+	inc bp
+	mov byte ptr [di], 'N'
 	inc di
-	mov [di], 'P'
+	inc bp
+	mov byte ptr [di], 'P'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jl:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'L'
+	inc bp
+	mov byte ptr [di], 'L'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jge:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'G'
+	inc bp
+	mov byte ptr [di], 'G'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jle:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'L'
+	inc bp
+	mov byte ptr [di], 'L'
 	inc di
-	mov [di], 'E'
+	inc bp
+	mov byte ptr [di], 'E'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_jg:
-	mov [di], 'J'
+	mov byte ptr [di], 'J'
 	inc di
-	mov [di], 'G'
+	inc bp
+	mov byte ptr [di], 'G'
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_000:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'x'
+	inc bp
+	mov byte ptr [di], 'x'
 	inc di
-	mov [di], '+'
+	inc bp
+	mov byte ptr [di], '+'
 	inc di
-	mov [di], 's'
+	inc bp
+	mov byte ptr [di], 's'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_001:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'x'
+	inc bp
+	mov byte ptr [di], 'x'
 	inc di
-	mov [di], '+'
+	inc bp
+	mov byte ptr [di], '+'
 	inc di
-	mov [di], 'd'
+	inc bp
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_010:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'p'
+	inc bp
+	mov byte ptr [di], 'p'
 	inc di
-	mov [di], '+'
+	inc bp
+	mov byte ptr [di], '+'
 	inc di
-	mov [di], 's'
+	inc bp
+	mov byte ptr [di], 's'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_011:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'p'
+	inc bp
+	mov byte ptr [di], 'p'
 	inc di
-	mov [di], '+'
+	inc bp
+	mov byte ptr [di], '+'
 	inc di
-	mov [di], 'd'
+	inc bp
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_100:
-	mov [di], 's'
+	mov byte ptr [di], 's'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_101:
-	mov [di], 'd'
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_110:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'p'
+	inc bp
+	mov byte ptr [di], 'p'
 	inc di
+	inc bp
 ret
 
 spausdink_ea_rm_111:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'x'
+	inc bp
+	mov byte ptr [di], 'x'
 	inc di
+	inc bp
 ret
 
 spausdink_es:
-	mov [di], 'e'
+	mov byte ptr [di], 'e'
 	inc di
-	mov [di], 's'
+	inc bp
+	mov byte ptr [di], 's'
 	inc di
+	inc bp
 ret
 
 spausdink_cs:
-	mov [di], 'c'
+	mov byte ptr [di], 'c'
 	inc di
-	mov [di], 's'
+	inc bp
+	mov byte ptr [di], 's'
 	inc di
+	inc bp
 ret
 
 spausdink_ss:
-	mov [di], 's'
+	mov byte ptr [di], 's'
 	inc di
-	mov [di], 's'
+	inc bp
+	mov byte ptr [di], 's'
 	inc di
+	inc bp
 ret
 
 spausdink_ds:
-	mov [di], 'd'
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 's'
+	inc bp
+	mov byte ptr [di], 's'
 	inc di
+	inc bp
 ret
 
 spausdink_ax:
-	mov [di], 'a'
+	mov byte ptr [di], 'a'
 	inc di
-	mov [di], 'x'
+	inc bp
+	mov byte ptr [di], 'x'
 	inc di
+	inc bp
 ret
 
 spausdink_al:
-	mov [di], 'a'
+	mov byte ptr [di], 'a'
 	inc di
-	mov [di], 'h'
+	inc bp
+	mov byte ptr [di], 'l'
 	inc di
+	inc bp
 ret
 
 spausdink_ah:
-	mov [di], 'a'
+	mov byte ptr [di], 'a'
 	inc di
-	mov [di], 'h'
+	inc bp
+	mov byte ptr [di], 'h'
 	inc di
+	inc bp
 ret
 
 spausdink_cx:
-	mov [di], 'c'
+	mov byte ptr [di], 'c'
 	inc di
-	mov [di], 'x'
+	inc bp
+	mov byte ptr [di], 'x'
 	inc di
+	inc bp
 ret
 
 spausdink_cl:
-	mov [di], 'c'
+	mov byte ptr [di], 'c'
 	inc di
-	mov [di], 'l'
+	inc bp
+	mov byte ptr [di], 'l'
 	inc di
+	inc bp
 ret
 
 spausdink_ch:
-	mov [di], 'c'
+	mov byte ptr [di], 'c'
 	inc di
-	mov [di], 'h'
+	inc bp
+	mov byte ptr [di], 'h'
 	inc di
+	inc bp
 ret
 
 spausdink_dx:
-	mov [di], 'd'
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 'x'
+	inc bp
+	mov byte ptr [di], 'x'
 	inc di
+	inc bp
 ret
 
 spausdink_dl:
-	mov [di], 'd'
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 'l'
+	inc bp
+	mov byte ptr [di], 'l'
 	inc di
+	inc bp
 ret
 
 spausdink_dh:
-	mov [di], 'd'
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 'h'
+	inc bp
+	mov byte ptr [di], 'h'
 	inc di
+	inc bp
 ret
 
 spausdink_bx:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'x'
+	inc bp
+	mov byte ptr [di], 'x'
 	inc di
+	inc bp
 ret
 
 spausdink_bl:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'l'
+	inc bp
+	mov byte ptr [di], 'l'
 	inc di
+	inc bp
 ret
 
 spausdink_bh:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'h'
+	inc bp
+	mov byte ptr [di], 'h'
 	inc di
+	inc bp
 ret
 
 spausdink_sp:
-	mov [di], 's'
+	mov byte ptr [di], 's'
 	inc di
-	mov [di], 'p'
+	inc bp
+	mov byte ptr [di], 'p'
 	inc di
+	inc bp
 ret
 
 spausdink_bp:
-	mov [di], 'b'
+	mov byte ptr [di], 'b'
 	inc di
-	mov [di], 'p'
+	inc bp
+	mov byte ptr [di], 'p'
 	inc di
+	inc bp
 ret
 
 spausdink_si:
-	mov [di], 's'
+	mov byte ptr [di], 's'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_di:
-	mov [di], 'd'
+	mov byte ptr [di], 'd'
 	inc di
-	mov [di], 'i'
+	inc bp
+	mov byte ptr [di], 'i'
 	inc di
+	inc bp
 ret
 
 spausdink_k:
-	mov [di], ','
+	mov byte ptr [di], ','
 	inc di
-	mov [di], ' '
+	inc bp
+	mov byte ptr [di], ' '
 	inc di
+	inc bp
 ret
 
 spausdink_sond:
-	mov [di], ']'
+	mov byte ptr [di], ']'
 	inc di
+	inc bp
 ret
 spausdink_sonk:
-	mov [di], '['
+	mov byte ptr [di], '['
 	inc di
+	inc bp
 ret
 
 spausdink_dvi:
-	mov [di], ':'
+	mov byte ptr [di], ':'
 	inc di
+	inc bp
 ret
-;**********************************************************************************************************************
-;------------------------------------------------------------------------------------------------------
+spausdink_pliusa:
+	mov byte ptr [di], '+'
+	inc di
+	inc bp
+ret
+trysTarpai:
+	mov byte ptr [di], ' '
+	inc di
+	inc bp
+	mov byte ptr [di], ' '
+	inc di
+	inc bp
+	mov byte ptr [di], ' '
+	inc di
+	inc bp
+ret
+
+spausdink_enter:
+	mov byte ptr [di], 13
+	inc di
+	inc bp
+	mov byte ptr [di], 10
+	inc di
+	inc bp
+ret
+spausdink_neatpazinta:
+	mov byte ptr [di], 'N'
+	inc di
+	inc bp
+	mov byte ptr [di], 'E'
+	inc di
+	inc bp
+	mov byte ptr [di], 'A'
+	inc di
+	inc bp
+	mov byte ptr [di], 'T'
+	inc di
+	inc bp
+	mov byte ptr [di], 'P'
+	inc di
+	inc bp
+	mov byte ptr [di], 'A'
+	inc di
+	inc bp
+	mov byte ptr [di], 'Z'
+	inc di
+	inc bp
+	mov byte ptr [di], 'I'
+	inc di
+	inc bp
+	mov byte ptr [di], 'N'
+	inc di
+	inc bp
+	mov byte ptr [di], 'T'
+	inc di
+	inc bp
+	mov byte ptr [di], 'A'
+	inc di
+	inc bp
+ret
+
+
+
+
+
 
 exit:
-    mov ah, 9
-    mov dx, offset enteris
-    int 21h
+	MOV	cx, ax				;cx - kiek baitų reikia įrašyti
+	MOV	bx, rFail			;į bx įrašom rezultato failo deskriptoriaus numerį
+	CALL	RasykBuf			;iškviečiame rašymo į failą procedūrą
+	
 
     mov ah, 4Ch
     int 21h
