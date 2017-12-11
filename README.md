@@ -71,7 +71,8 @@ F6 - F7</br>
 1100 0010 bojb bovb – RET betarpiškas operandas; RETN betarpiškas operandas(+)</br>
 1100 0011 – RET; RETN(+)</br>
 1100 1010 bojb bovb – RETF betarpiškas operandas(+)</br>
-C2</br>C3</br>CA</br>
+1100 1111 – IRET</br>
+C2</br>C3</br>CA</br>CF</br>
 </br></br>
 <strong>Visi JMP variantai (5);</strong></br>
 1110 1001 pjb pvb – JMP žymė (vidinis tiesioginis)(+)</br>
