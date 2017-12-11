@@ -82,26 +82,26 @@ C2</br>C3</br>CA</br>
 E9</br>EA</br>EB</br>FF</br>FF</br>
 </br></br>
 <strong>Visos sąlyginio valdymo perdavimo komandos (17);</strong></br>
-0111 0000 poslinkis – JO žymė</br>
-0111 0001 poslinkis – JNO žymė</br>
-0111 0010 poslinkis – JNAE žymė; JB žymė; JC žymė</br>
-0111 0011 poslinkis – JAE žymė; JNB žymė; JNC žymė</br>
-0111 0100 poslinkis – JE žymė; JZ žymė</br>
-0111 0101 poslinkis – JNE žymė; JNZ žymė</br>
-0111 0110 poslinkis – JBE žymė; JNA žymė</br>
-0111 0111 poslinkis – JA žymė; JNBE žymė</br>
-0111 1000 poslinkis – JS žymė</br>
-0111 1001 poslinkis – JNS žymė</br>
-0111 1010 poslinkis – JP žymė; JPE žymė</br>
-0111 1011 poslinkis – JNP žymė; JPO žymė</br>
-0111 1100 poslinkis – JL žymė; JNGE žymė</br>
-0111 1101 poslinkis – JGE žymė; JNL žymė</br>
-0111 1110 poslinkis – JLE žymė; JNG žymė</br>
-0111 1111 poslinkis – JG žymė; JNLE žymė</br>
+0111 0000 poslinkis – JO žymė*-DONE-*+++</br>
+0111 0001 poslinkis – JNO žymė*-DONE-*+++</br>
+0111 0010 poslinkis – JNAE žymė; JB žymė; JC žymė*-DONE-*+++</br>
+0111 0011 poslinkis – JAE žymė; JNB žymė; JNC žymė*-DONE-*+++</br>
+0111 0100 poslinkis – JE žymė; JZ žymė*-DONE-*+++</br>
+0111 0101 poslinkis – JNE žymė; JNZ žymė*-DONE-*+++</br>
+0111 0110 poslinkis – JBE žymė; JNA žymė*-DONE-*+++</br>
+0111 0111 poslinkis – JA žymė; JNBE žymė*-DONE-*+++</br>
+0111 1000 poslinkis – JS žymė*-DONE-*+++</br>
+0111 1001 poslinkis – JNS žymė*-DONE-*+++</br>
+0111 1010 poslinkis – JP žymė; JPE žymė*-DONE-*+++</br>
+0111 1011 poslinkis – JNP žymė; JPO žymė*-DONE-*+++</br>
+0111 1100 poslinkis – JL žymė; JNGE žymė*-DONE-*+++</br>
+0111 1101 poslinkis – JGE žymė; JNL žymė*-DONE-*+++</br>
+0111 1110 poslinkis – JLE žymė; JNG žymė*-DONE-*+++</br>
+0111 1111 poslinkis – JG žymė; JNLE žymė*-DONE-*+++</br>
 B0</br>B1</br>B2</br>B3</br>B4</br>B5</br>B6</br>B7</br>B8</br>B9</br>BA</br>BB</br>BC</br>BD</br>BE</br>
 </br></br>
 <strong>Komanda LOOP;</strong></br>
-1110 0010 poslinkis – LOOP žymė</br>
+1110 0010 poslinkis – LOOP žymė*-DONE-*+++</br>
 D2</br>
 </br></br>
 <strong>Komanda INT;</strong></br>
