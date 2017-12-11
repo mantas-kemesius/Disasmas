@@ -77,7 +77,7 @@ C2</br>C3</br>CA</br>CF</br>
 <strong>Visi JMP variantai (5);</strong></br>
 1110 1001 pjb pvb – JMP žymė (vidinis tiesioginis)(+)</br>
 1110 1010 ajb avb srjb srvb – JMP žymė (išorinis tiesioginis)(+)</br>
-1110 1011 poslinkis – JMP žymė (vidinis artimas)</br>
+1110 1011 poslinkis – JMP žymė (vidinis artimas)*-DONE-*</br>
 1111 1111 mod 100 r/m [poslinkis] – JMP adresas (vidinis netiesioginis)(+)*-DONE-*</br>
 1111 1111 mod 101 r/m [poslinkis] – JMP adresas (išorinis netiesioginis)(+)*-DONE-*</br>
 E9</br>EA</br>EB</br>FF</br>FF</br>
