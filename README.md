@@ -61,7 +61,7 @@ F6 - F7</br>
 F6 - F7</br>
 </br></br>
 <strong>Visi CALL variantai (4);</strong></br>
-1001 1010 ajb avb srjb srvb – CALL žymė (išorinis tiesioginis)(+)</br>
+1001 1010 ajb avb srjb srvb – CALL žymė (išorinis tiesioginis)(+)*-DONE-*+++</br>
 1110 1000 pjb pvb – CALL žymė (vidinis tiesioginis)(+)*-DONE-*</br>
 1111 1111 mod 010 r/m [poslinkis] – CALL adresas (vidinis netiesioginis)(+)*-DONE-*</br>
 1111 1111 mod 011 r/m [poslinkis] – CALL adresas (išorinis netiesioginis)(+)*-DONE-*</br>
@@ -76,7 +76,7 @@ C2</br>C3</br>CA</br>CF</br>
 </br></br>
 <strong>Visi JMP variantai (5);</strong></br>
 1110 1001 pjb pvb – JMP žymė (vidinis tiesioginis)(+)*-DONE-*</br>
-1110 1010 ajb avb srjb srvb – JMP žymė (išorinis tiesioginis)(+)</br>
+1110 1010 ajb avb srjb srvb – JMP žymė (išorinis tiesioginis)(+)*-DONE-*+++</br>
 1110 1011 poslinkis – JMP žymė (vidinis artimas)*-DONE-*</br>
 1111 1111 mod 100 r/m [poslinkis] – JMP adresas (vidinis netiesioginis)(+)*-DONE-*</br>
 1111 1111 mod 101 r/m [poslinkis] – JMP adresas (išorinis netiesioginis)(+)*-DONE-*</br>
