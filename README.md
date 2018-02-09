@@ -1,6 +1,6 @@
 <h1>Disasembleris</h1>
 
-<strong>Programa rašyta su assembly programavimo kalba</strong>
+<strong>Programa rašyta su assembly programavimo kalba (4407 eilutės)</strong>
 
 <p>Programa skirta mašinio kodo vertimui į vėliau išrašytas komandas. Programa nuskaito <strong>.com</strong> faile esantį mašininį kodą, jį apdoroja ir paverčia į komandas, kurias išspausdina atsakymų faile. Daugiau informacijos apie disasemblerį: https://klevas.mif.vu.lt/~julius/2013Rud/KompArch/Disasm/Disasm.html</p>
 
