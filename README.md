@@ -1,5 +1,11 @@
-<h1>Asemblerio komandų operacijos kodų sąrašas</h1>
+<h1>Disasembleris</h1>
 
+<strong>Programa rašyta su assembly programavimo kalba</strong>
+
+<p>Programa skirta mašinio kodo vertimui į vėliau išrašytas komandas. Programa nuskaito <strong>.com</strong> faile esantį mašininį kodą, jį apdoroja ir paverčia į komandas, kurias išspausdina atsakymų faile. Daugiau informacijos apie disasemblerį: https://klevas.mif.vu.lt/~julius/2013Rud/KompArch/Disasm/Disasm.html</p>
+
+
+<h2>Asemblerio komandų operacijos kodų sąrašas</h2>
 </br></br>
 <strong>Visi MOV variantai (6):</strong></br>
 1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis (+)*-DONE-*</br>
