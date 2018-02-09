@@ -8,37 +8,42 @@
 <h2>Asemblerio komandų operacijos kodų sąrašas</h2>
 </br></br>
 <strong>Visi MOV variantai (6):</strong></br>
-1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis (+)*-DONE-*</br>
-1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis(+)*-DONE-*</br> 
-1010 000w ajb avb – MOV akumuliatorius  atmintis(+)*-DONE-*</br>
-1010 001w ajb avb – MOV atmintis  akumuliatorius(+)*-DONE-*</br>
-1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas(+)*-DONE-*</br>
-1100 011w mod 000 r/m [poslinkis] bojb [bovb] – MOV registras/atmintis  betarpiškas operandas(+)*-DONE-*</br>
+1000 10dw mod reg r/m [poslinkis] – MOV registras  registras/atmintis</br>
+1000 11d0 mod 0sr r/m [poslinkis] – MOV segmento registras  registras/atmintis</br>
+1010 000w ajb avb – MOV akumuliatorius  atmintis</br>
+1010 001w ajb avb – MOV atmintis  akumuliatorius</br>
+1011 wreg bojb [bovb] – MOV registras  betarpiškas operandas</br>
+1100 011w mod 000 r/m [poslinkis] bojb [bovb] – MOV registras/atmintis  betarpiškas operandas</br>
+<strong>Komandos HEX formatuose</strong></br>
 88 - 8B</br>8C - 8E </br>A0 - A1 </br>A2 - A3 </br>B0 - BF </br>C6 - C7</br>
 
 </br></br>
 <strong>Visi PUSH variantai (3);</strong></br>
-000sr 110 – PUSH segmento registras(+)*-DONE-*+++</br>
-0101 0reg – PUSH registras (žodinis)(+)*-DONE-*+++</br>
-1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis(+)*-DONE-*+++</br>
+000sr 110 – PUSH segmento registras</br>
+0101 0reg – PUSH registras (žodinis)</br>
+1111 1111 mod 110 r/m [poslinkis] – PUSH registras/atmintis</br>
+<strong>Komandos HEX formatuose</strong></br>
 06 - 1E</br>50 - 57 </br>FF </br>
 </br></br>
 <strong>Visi POP variantai (3);</strong></br>
-0101 1reg – POP registras (žodinis)(+)*-DONE-*</br>
-000sr 111 – POP segmento registras(+)*-DONE-*+++</br>
-1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis(+)*-DONE-*+++</br>
+0101 1reg – POP registras (žodinis)(+)</br>
+000sr 111 – POP segmento registras(+)</br>
+1000 1111 mod 000 r/m [poslinkis] – POP registras/atmintis(+)</br>
+<strong>Komandos HEX formatuose</strong></br>
 58 - 5F</br>07 - 1F</br>8F</br>
 
 </br></br>
 <strong>Visi ADD variantai (3);</strong></br>
-0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas(+)*-DONE-*+++</br>
-0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis(+)*-DONE-*+++</br>
-1000 00sw mod 000 r/m [poslinkis] bojb [bovb] – ADD registras/atmintis += betarpiškas operandas **(veliau)(+)*-DONE-*</br> 
+0000 010w bojb [bovb] – ADD akumuliatorius += betarpiškas operandas(+)</br>
+0000 00dw mod reg r/m [poslinkis] – ADD registras += registras/atmintis(+)</br>
+1000 00sw mod 000 r/m [poslinkis] bojb [bovb] – ADD registras/atmintis += betarpiškas operandas</br> 
+<strong>Komandos HEX formatuose</strong></br>
 04 - 05</br>00 - 03</br>80 - 83</br>
 </br></br>
 <strong>Visi INC variantai (2);</strong></br>
-0100 0reg – INC registras (žodinis)(+)*-DONE-*</br>
-1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis(+)*-DONE-*+++</br>
+0100 0reg – INC registras (žodinis)(+)</br>
+1111 111w mod 000 r/m [poslinkis] – INC registras/atmintis(+)</br>
+<strong>Komandos HEX formatuose</strong></br>
 40 - 47</br>FE - FF</br>
 </br></br>
 <strong>Visi DEC variantai (2);</strong></br>
@@ -47,9 +52,10 @@
 48 - 4F</br>FF - FE</br>
 </br></br>
 <strong>Visi SUB variantai (3);</strong></br>
-0010 110w bojb [bovb] – SUB akumuliatorius -= betarpiškas operandas(+)*-DONE-*+++</br>
-1000 00sw mod 101 r/m [poslinkis] bojb [bovb] – SUB registras/atmintis -= betarpiškas operandas **(veliau)(+)*-DONE-*</br> 
-0010 10dw mod reg r/m [poslinkis] – SUB registras -= registras/atmintis(+)*-DONE-*</br>
+0010 110w bojb [bovb] – SUB akumuliatorius -= betarpiškas operandas</br>
+1000 00sw mod 101 r/m [poslinkis] bojb [bovb] – SUB registras/atmintis -= betarpiškas operandas</br> 
+0010 10dw mod reg r/m [poslinkis] – SUB registras -= registras/atmintis</br>
+<strong>Komandos HEX formatuose</strong></br>
 2C - 2D</br>80 - 83</br>28 - 2B</br>
 </br></br>
 <strong>Visi CMP variantai (3);</strong></br>
@@ -104,11 +110,12 @@ E9</br>EA</br>EB</br>FF</br>FF</br>
 0111 1100 poslinkis – JL žymė; JNGE žymė*-DONE-*+++</br>
 0111 1101 poslinkis – JGE žymė; JNL žymė*-DONE-*+++</br>
 0111 1110 poslinkis – JLE žymė; JNG žymė*-DONE-*+++</br>
-0111 1111 poslinkis – JG žymė; JNLE žymė*-DONE-*+++</br>
+0111 1111 poslinkis – JG žymė; JNLE žymė</br>
+<strong>Komandos HEX formatuose</strong></br>
 B0</br>B1</br>B2</br>B3</br>B4</br>B5</br>B6</br>B7</br>B8</br>B9</br>BA</br>BB</br>BC</br>BD</br>BE</br>
 </br></br>
 <strong>Komanda LOOP;</strong></br>
-1110 0010 poslinkis – LOOP žymė*-DONE-*+++</br>
+1110 0010 poslinkis – LOOP žymė</br>
 D2</br>
 </br></br>
 <strong>Komanda INT;</strong></br>
